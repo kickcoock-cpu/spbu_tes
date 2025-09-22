@@ -1,8 +1,6 @@
 // File ini diperlukan untuk membuat backend kompatibel dengan Vercel
 const express = require('express');
 const cors = require('cors');
-const { Server } = require('socket.io');
-const { createServer } = require('http');
 const { connectDB } = require('./config/db');
 require('dotenv').config();
 
