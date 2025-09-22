@@ -199,11 +199,6 @@ const loginUser = async (req, res) => {
     });
   }
 };
-      message: 'Server Error',
-      error: error.message
-    });
-  }
-};
 
 // @desc    Get all operators
 // @route   GET /api/users/operators
