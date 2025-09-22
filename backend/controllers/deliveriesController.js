@@ -1,5 +1,5 @@
 const { Delivery, SPBU, User, FuelStock, Tank } = require('../models');
-const { broadcastDashboardUpdate } = require('../index');
+const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
 const { recordDeliveryTransaction } = require('../utils/ledgerUtils');
 
 // @desc    Get deliveries ready for confirmation (H+1)

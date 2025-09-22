@@ -1,6 +1,6 @@
 const { Sale, SPBU, User, Tank, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const { broadcastDashboardUpdate } = require('../index');
+const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
 const { updatePredictionsOnSale } = require('../services/realtime-stockout-service');
 const { v4: uuidv4 } = require('uuid');
 const { recordSaleTransaction } = require('../utils/ledgerUtils');

@@ -34,6 +34,7 @@ const io = new Server(server, {
       }
       
       // Allow requests from our local IPs
+      const allLocalIPs = getAllLocalIPs();
       for (const ip of allLocalIPs) {
         if (origin === `http://${ip}:3000` || origin === `http://${ip}:5173`) {
           return callback(null, true);
@@ -180,12 +181,8 @@ const broadcastDashboardUpdate = async (userId = null, spbuId = null, userRole =
   }
 };
 
-// Periodically broadcast dashboard updates to all connected clients
-// This is now handled by individual client requests, so we can remove this
-// or make it less frequent for Super Admin only
-
-// Export io instance for use in other modules
-module.exports = { io, broadcastDashboardUpdate };
+// Export io instance and broadcast function for use in other modules
+module.exports = { io, broadcastDashboardUpdate, connectedClients };
 
 // Get local IP addresses
 const localIP = getLocalIP();
