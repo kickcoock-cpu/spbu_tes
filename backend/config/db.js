@@ -14,21 +14,27 @@ try {
   console.log('DB_HOST:', process.env.DB_HOST);
   console.log('DB_DIALECT:', process.env.DB_DIALECT);
 
-  // Untuk testing: gunakan values yang benar secara langsung
-  const dbHost = process.env.DB_HOST || 'aws-0-us-west-1.pooler.supabase.com';
-  const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
+  // Hardcode values yang benar untuk menghindari masalah environment variables lama
+  const dbHost = 'aws-0-us-west-1.pooler.supabase.com';
+  const dbUser = 'postgres.eqwnpfuuwpdsacyvdrvj';
+  const dbName = 'postgres';
+  const dbPassword = 'Pertamina1*';
+  const dbPort = 5432;
   
-  console.log('Using database host:', dbHost);
-  console.log('Using database user:', dbUser);
+  console.log('Using hardcoded database configuration:');
+  console.log('- Host:', dbHost);
+  console.log('- User:', dbUser);
+  console.log('- Database:', dbName);
+  console.log('- Port:', dbPort);
 
   sequelize = new Sequelize(
-    process.env.DB_NAME || 'postgres',
+    dbName,
     dbUser,
-    process.env.DB_PASSWORD || 'Pertamina1*',
+    dbPassword,
     {
       host: dbHost,
-      port: process.env.DB_PORT || 5432,
-      dialect: isPostgres ? 'postgres' : 'mysql',
+      port: dbPort,
+      dialect: 'postgres',
       logging: false, // Set ke true jika ingin melihat query SQL di console
       pool: {
         max: 10,
@@ -36,19 +42,17 @@ try {
         acquire: 30000,
         idle: 10000
       },
-      ...(isPostgres && {
-        dialectOptions: {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false
-          }
-        },
-        ssl: true
-      })
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      },
+      ssl: true
     }
   );
 
-  console.log(`Database configured for ${isPostgres ? 'PostgreSQL/Supabase' : 'MySQL'}`);
+  console.log(`Database configured for PostgreSQL/Supabase`);
 } catch (error) {
   console.error('Error configuring database:', error);
   throw error;
