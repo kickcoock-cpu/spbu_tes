@@ -2,17 +2,8 @@ const { Sale, SPBU, User, Tank, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
 const { updatePredictionsOnSale } = require('../services/realtime-stockout-service');
+const { v4: uuidv4 } = require('uuid');
 const { recordSaleTransaction } = require('../utils/ledgerUtils');
-
-// Function to get uuid v4 - using dynamic import for ESM module
-let uuidv4;
-const getUuidv4 = async () => {
-  if (!uuidv4) {
-    const { v4 } = await import('uuid');
-    uuidv4 = v4;
-  }
-  return uuidv4;
-};
 
 // @desc    Get sales by operator
 // @route   GET /api/sales/by-operator/:operatorId
@@ -144,8 +135,7 @@ const createSale = async (req, res) => {
       
       if (!isUnique) {
         // Fallback to UUID if we can't generate a unique ID
-        const { v4 } = await import('uuid');
-        transactionId = `ID-${v4().substring(0, 10)}`;
+        transactionId = `ID-${uuidv4().substring(0, 10)}`;
       }
       
       return transactionId;

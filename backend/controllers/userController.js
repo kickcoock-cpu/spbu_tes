@@ -121,10 +121,15 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Request method:', req.method);
+    console.log('Request body:', req.body);
+    
     const { email, username, password } = req.body;
 
     // Validate email/username and password
     if ((!email && !username) || !password) {
+      console.log('Missing email/username or password');
       return res.status(400).json({
         success: false,
         message: 'Please provide an email or username and password'
@@ -139,6 +144,8 @@ const loginUser = async (req, res) => {
       whereClause.username = username;
     }
 
+    console.log('Searching user with where clause:', whereClause);
+    
     const user = await User.findOne({ 
       where: whereClause,
       include: [
@@ -148,6 +155,12 @@ const loginUser = async (req, res) => {
     });
 
     if (!user) {
+      console.log('User not found');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
