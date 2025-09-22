@@ -137,56 +137,6 @@ export function Apps() {
               className='rounded-lg border p-4 hover:shadow-md'
             >
               <div className='mb-8 flex items-center justify-between'>
-        <div className='my-4 flex items-end justify-between sm:my-0 sm:items-center'>
-          <div className='flex flex-col gap-4 sm:my-4 sm:flex-row'>
-            <Input
-              placeholder='Filter apps...'
-              className='h-9 w-40 lg:w-[250px]'
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-            <Select value={appType} onValueChange={handleTypeChange}>
-              <SelectTrigger className='w-36'>
-                <SelectValue>{appText.get(appType)}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Apps</SelectItem>
-                <SelectItem value='connected'>Connected</SelectItem>
-                <SelectItem value='notConnected'>Not Connected</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Select value={sort} onValueChange={handleSortChange}>
-            <SelectTrigger className='w-16'>
-              <SelectValue>
-                <SlidersHorizontal size={18} />
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent align='end'>
-              <SelectItem value='asc'>
-                <div className='flex items-center gap-4'>
-                  <ArrowUpAZ size={16} />
-                  <span>Ascending</span>
-                </div>
-              </SelectItem>
-              <SelectItem value='desc'>
-                <div className='flex items-center gap-4'>
-                  <ArrowDownAZ size={16} />
-                  <span>Descending</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <Separator className='shadow-sm' />
-        <ul className='faded-bottom no-scrollbar grid gap-4 overflow-auto pt-4 pb-16 md:grid-cols-2 lg:grid-cols-3'>
-          {filteredApps.map((app) => (
-            <li
-              key={app.name}
-              className='rounded-lg border p-4 hover:shadow-md'
-            >
-              <div className='mb-8 flex items-center justify-between'>
                 <div
                   className={`bg-muted flex size-10 items-center justify-center rounded-lg p-2`}
                 >
@@ -207,6 +157,7 @@ export function Apps() {
             </li>
           ))}
         </ul>
-      </Main>
+      </div>
+    </Main>
   )
 }
