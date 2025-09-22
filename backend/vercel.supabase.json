@@ -2,17 +2,27 @@
   "version": 2,
   "builds": [
     {
-      "src": "api.js",
+      "src": "supabase-entry.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["**"]
+        "includeFiles": [
+          "package.json",
+          "supabase-entry.js",
+          "config/**",
+          "models/**",
+          "routes/**",
+          "controllers/**",
+          "middleware/**",
+          "utils/**",
+          ".env"
+        ]
       }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api.js"
+      "dest": "supabase-entry.js"
     }
   ],
   "env": {
