@@ -14,13 +14,20 @@ try {
   console.log('DB_HOST:', process.env.DB_HOST);
   console.log('DB_DIALECT:', process.env.DB_DIALECT);
 
+  // Untuk testing: gunakan values yang benar secara langsung
+  const dbHost = process.env.DB_HOST || 'aws-0-us-west-1.pooler.supabase.com';
+  const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
+  
+  console.log('Using database host:', dbHost);
+  console.log('Using database user:', dbUser);
+
   sequelize = new Sequelize(
-    process.env.DB_NAME || (isPostgres ? 'postgres' : 'spbu_db'),
-    process.env.DB_USER || (isPostgres ? 'postgres' : 'root'),
-    process.env.DB_PASSWORD || '',
+    process.env.DB_NAME || 'postgres',
+    dbUser,
+    process.env.DB_PASSWORD || 'Pertamina1*',
     {
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || (isPostgres ? 5432 : 3306),
+      host: dbHost,
+      port: process.env.DB_PORT || 5432,
       dialect: isPostgres ? 'postgres' : 'mysql',
       logging: false, // Set ke true jika ingin melihat query SQL di console
       pool: {
