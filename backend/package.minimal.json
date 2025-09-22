@@ -1,9 +1,9 @@
 {
-  "name": "spbu-rbac-api",
+  "name": "spbu-rbac-api-minimal",
   "version": "1.0.0",
-  "main": "api.js",
+  "main": "vercel-minimal.js",
   "scripts": {
-    "build": "echo \"Building backend...\""
+    "build": "echo \"Building minimal backend...\""
   },
   "dependencies": {
     "express": "^4.18.2"

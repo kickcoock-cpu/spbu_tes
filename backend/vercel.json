@@ -3,7 +3,19 @@
   "builds": [
     {
       "src": "vercel-entry.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "package.json",
+          "vercel-entry.js",
+          "config/**",
+          "models/**",
+          "routes/**",
+          "controllers/**",
+          "middleware/**",
+          "utils/**"
+        ]
+      }
     }
   ],
   "routes": [
