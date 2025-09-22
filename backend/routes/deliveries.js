@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const { protect, authorize } = require('../middleware/auth');
 const {
   createDelivery,
@@ -13,30 +12,39 @@ const {
   getAllDeliveriesForOperator
 } = require('../controllers/deliveriesController');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/delivery-orders/')
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, 'delivery-order-' + uniqueSuffix + '.' + file.mimetype.split('/')[1])
-  }
-})
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true)
-    } else {
-      cb(new Error('Only image files are allowed'))
+// Only configure multer for local development, not for Vercel
+let upload;
+if (process.env.NODE_ENV !== 'production') {
+  const multer = require('multer');
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'uploads/delivery-orders/')
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      cb(null, 'delivery-order-' + uniqueSuffix + '.' + file.mimetype.split('/')[1])
     }
-  }
-});
+  })
+
+  upload = multer({ 
+    storage: storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true)
+      } else {
+        cb(new Error('Only image files are allowed'))
+      }
+    }
+  });
+} else {
+  // For Vercel production, use memory storage or skip file upload handling
+  upload = {
+    single: () => (req, res, next) => next()
+  };
+}
 
 // All roles that can access deliveries
 router.route('/')
