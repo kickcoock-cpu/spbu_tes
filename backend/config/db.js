@@ -35,7 +35,8 @@ try {
             require: true,
             rejectUnauthorized: false
           }
-        }
+        },
+        ssl: true
       })
     }
   );
@@ -69,6 +70,14 @@ const connectDB = async () => {
     }
 
     console.log('Attempting to connect to database...');
+    console.log('Database config:', {
+      host: sequelize.config.host,
+      port: sequelize.config.port,
+      database: sequelize.config.database,
+      username: sequelize.config.username,
+      dialect: sequelize.config.dialect
+    });
+    
     await sequelize.authenticate();
     console.log(`Koneksi database berhasil terestablish dengan ${sequelize.getDialect() === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'}.`);
     
@@ -79,6 +88,14 @@ const connectDB = async () => {
     }
   } catch (error) {
     console.error(`Tidak dapat terhubung ke database ${sequelize.getDialect() === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'}:`, error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      syscall: error.syscall,
+      hostname: error.hostname,
+      host: error.host,
+      port: error.port
+    });
     throw error;
   }
 };

@@ -19,7 +19,6 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 405) {
       console.error('Method Not Allowed (405) - Check API endpoint and method');
-      // Bisa menambahkan logika untuk redirect ke halaman error atau mencoba ulang
     }
     return Promise.reject(error);
   }
