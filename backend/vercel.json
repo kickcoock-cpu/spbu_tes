@@ -13,7 +13,8 @@
           "routes/**",
           "controllers/**",
           "middleware/**",
-          "utils/**"
+          "utils/**",
+          ".env.vercel"
         ]
       }
     }
@@ -23,5 +24,16 @@
       "src": "/(.*)",
       "dest": "vercel-entry.js"
     }
-  ]
+  ],
+  "env": {
+    "DB_DIALECT": "postgres",
+    "DB_HOST": "db.eqwnpfuuwpdsacyvdrvj.supabase.co",
+    "DB_PORT": "5432",
+    "DB_NAME": "postgres",
+    "DB_USER": "postgres",
+    "DB_PASSWORD": "Pertamina1*",
+    "JWT_SECRET": "r+Zkdof1G2kxC3QjRKWBWljGMyyBTP7Wf2mp/NW2ymDbJgFDl94w6vpuEIL4xr30XpAYI8ClmoqgAYUr3BeQQQ==",
+    "NODE_ENV": "production",
+    "SYNC_DATABASE": "false"
+  }
 }

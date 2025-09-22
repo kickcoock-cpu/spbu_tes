@@ -1,31 +1,14 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "supabase-entry.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "package.json",
-          "supabase-entry.js",
-          "config/**",
-          "models/**",
-          "routes/**",
-          "controllers/**",
-          "middleware/**",
-          "utils/**",
-          ".env"
-        ]
-      }
+      "src": "vercel-entry.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "supabase-entry.js"
+      "dest": "vercel-entry.js"
     }
-  ],
-  "env": {
-    "DB_DIALECT": "postgres"
-  }
+  ]
 }

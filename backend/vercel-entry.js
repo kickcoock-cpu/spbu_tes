@@ -1,8 +1,15 @@
 // Entry point khusus untuk Vercel Serverless Functions
 const express = require('express');
 const cors = require('cors');
-const { connectDB } = require('./config/db');
 require('dotenv').config();
+
+// Log environment variables for debugging (remove in production)
+console.log('DB_DIALECT:', process.env.DB_DIALECT);
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
+// Inisialisasi koneksi database
+const { connectDB } = require('./config/db');
 
 // Inisialisasi aplikasi Express
 const app = express();
@@ -41,7 +48,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: process.env.DB_DIALECT === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'
   });
 });
 
