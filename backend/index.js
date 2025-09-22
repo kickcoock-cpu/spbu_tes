@@ -122,67 +122,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Function to broadcast dashboard updates to all connected clients
-const broadcastDashboardUpdate = async (userId = null, spbuId = null, userRole = null) => {
-  // If specific user data is provided, only broadcast to that user's SPBU
-  // Otherwise, broadcast to all connected clients with appropriate filtering
-  
-  if (connectedClients.size > 0) {
-    try {
-      // Import dashboard controller function
-      const { getDashboard } = require('./controllers/dashboardController');
-      
-      // Broadcast to each connected client with their specific data
-      for (const [clientId, socket] of connectedClients) {
-        try {
-          // Create a mock request object with user context
-          const mockReq = {
-            user: {
-              Role: { name: 'Super Admin' }, // Default to Super Admin
-              id: 1,
-              spbu_id: null
-            }
-          };
-          
-          // If we have user info, use it
-          if (userId && spbuId && userRole) {
-            mockReq.user = {
-              Role: { name: userRole },
-              id: userId,
-              spbu_id: userRole === 'Super Admin' ? null : spbuId
-            };
-          }
-          
-          // Create a mock response object
-          const mockRes = {
-            status: function(code) {
-              this.statusCode = code;
-              return this;
-            },
-            json: function(data) {
-              // Send data to the specific client
-              socket.emit('dashboardDataUpdate', data);
-            }
-          };
-          
-          // Call the dashboard controller
-          await getDashboard(mockReq, mockRes);
-        } catch (clientError) {
-          console.error('Error sending dashboard data to client:', clientId, clientError);
-        }
-      }
-    } catch (error) {
-      console.error('Error broadcasting dashboard data:', error);
-      // Send error to all clients
-      for (const [clientId, socket] of connectedClients) {
-        socket.emit('dashboardDataError', { message: 'Failed to fetch dashboard data' });
-      }
-    }
-  }
-};
-
-// Export io instance and broadcast function for use in other modules
-module.exports = { io, broadcastDashboardUpdate, connectedClients };
+// Export io instance and connectedClients for use in other modules
+module.exports = { io, connectedClients };
 
 // Get local IP addresses
 const localIP = getLocalIP();
@@ -233,19 +174,19 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/spbu', require('./routes/spbu'));
-app.use('/api/sales', require('./routes/sales'));
-app.use('/api/deliveries', require('./routes/deliveries'));
-app.use('/api/deposits', require('./routes/deposits'));
-app.use('/api/prices', require('./routes/prices'));
-app.use('/api/reports', require('./routes/reports'));
-app.use('/api/reports/ledger', require('./routes/ledger'));
-app.use('/api/attendance', require('./routes/attendance'));
-app.use('/api/adjustments', require('./routes/adjustments'));
-app.use('/api/audit', require('./routes/audit'));
-app.use('/api/prediction', require('./routes/prediction'));
-app.use('/api/menu', require('./routes/menu'));
-app.use('/api/tanks', require('./routes/tanks'));
-app.use('/api/suspicious', require('./routes/suspicious'));
+// app.use('/api/sales', require('./routes/sales'));
+// app.use('/api/deliveries', require('./routes/deliveries'));
+// app.use('/api/deposits', require('./routes/deposits'));
+// app.use('/api/prices', require('./routes/prices'));
+// app.use('/api/reports', require('./routes/reports'));
+// app.use('/api/reports/ledger', require('./routes/ledger'));
+// app.use('/api/attendance', require('./routes/attendance'));
+// app.use('/api/adjustments', require('./routes/adjustments'));
+// app.use('/api/audit', require('./routes/audit'));
+// app.use('/api/prediction', require('./routes/prediction'));
+// app.use('/api/menu', require('./routes/menu'));
+// app.use('/api/tanks', require('./routes/tanks'));
+// app.use('/api/suspicious', require('./routes/suspicious'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

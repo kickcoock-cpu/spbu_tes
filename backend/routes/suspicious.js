@@ -6,7 +6,7 @@ const {
 } = require('../controllers/suspiciousTransactionsController');
 
 // Only Super Admin and Admin can access suspicious transactions monitoring
-router.route('/suspicious')
+router.route('/')
   .get(protect, authorize('Super Admin', 'Admin'), getSuspiciousTransactions);
 
 module.exports = router;
