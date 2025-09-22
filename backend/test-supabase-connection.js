@@ -1,14 +1,14 @@
-// File untuk menguji koneksi database Supabase
+// File untuk menguji koneksi database
 const { connectDB } = require('./config/db');
 
-console.log('Menguji koneksi database Supabase...');
+console.log('Menguji koneksi database...');
 
 connectDB()
   .then(() => {
-    console.log('Koneksi ke Supabase berhasil!');
+    console.log('Koneksi ke database berhasil!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('Koneksi ke Supabase gagal:', error);
+    console.error('Koneksi ke database gagal:', error);
     process.exit(1);
   });

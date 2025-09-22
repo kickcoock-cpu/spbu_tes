@@ -2,16 +2,16 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 // Konfigurasi koneksi database - mendukung baik MySQL maupun PostgreSQL (Supabase)
-const isSupabase = process.env.DB_DIALECT === 'postgres';
+const isPostgres = process.env.DB_DIALECT === 'postgres';
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || (isSupabase ? 'postgres' : 'spbu_db'),
-  process.env.DB_USER || (isSupabase ? 'postgres' : 'root'),
+  process.env.DB_NAME || (isPostgres ? 'postgres' : 'spbu_db'),
+  process.env.DB_USER || (isPostgres ? 'postgres' : 'root'),
   process.env.DB_PASSWORD || '',
   {
     host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || (isSupabase ? 5432 : 3306),
-    dialect: isSupabase ? 'postgres' : 'mysql',
+    port: process.env.DB_PORT || (isPostgres ? 5432 : 3306),
+    dialect: isPostgres ? 'postgres' : 'mysql',
     logging: false, // Set ke true jika ingin melihat query SQL di console
     pool: {
       max: 10,
@@ -19,7 +19,7 @@ const sequelize = new Sequelize(
       acquire: 30000,
       idle: 10000
     },
-    ...(isSupabase && {
+    ...(isPostgres && {
       dialectOptions: {
         ssl: {
           require: true,
@@ -34,7 +34,7 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log(`Koneksi database berhasil terestablish dengan ${isSupabase ? 'Supabase/PostgreSQL' : 'MySQL'}.`);
+    console.log(`Koneksi database berhasil terestablish dengan ${isPostgres ? 'Supabase/PostgreSQL' : 'MySQL'}.`);
     
     // Jika SYNC_DATABASE diatur ke true, sinkronkan model
     if (process.env.SYNC_DATABASE === 'true') {
@@ -42,7 +42,7 @@ const connectDB = async () => {
       console.log('Semua model telah disinkronkan.');
     }
   } catch (error) {
-    console.error(`Tidak dapat terhubung ke database ${isSupabase ? 'Supabase' : ''}:`, error);
+    console.error(`Tidak dapat terhubung ke database ${isPostgres ? 'Supabase/PostgreSQL' : 'MySQL'}:`, error);
     process.exit(1);
   }
 };

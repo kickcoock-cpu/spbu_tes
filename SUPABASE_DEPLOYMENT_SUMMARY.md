@@ -17,7 +17,7 @@
 - [ ] Catat URL backend
 - [ ] Deploy frontend ke Vercel dengan `VITE_API_URL` yang sesuai
 
-## File Konfigurasi yang Telah Dibuat
+## File Konfigurasi yang Telah Dibuat/Diperbarui
 
 ### Backend
 - `config/supabase-db.js` - Konfigurasi khusus untuk Supabase
@@ -25,6 +25,7 @@
 - `test-supabase-connection.js` - Script untuk test koneksi database
 - `vercel.supabase.json` - Konfigurasi Vercel khusus untuk Supabase
 - `.env.supabase` - Contoh environment variables untuk Supabase
+- `package.json` - Diperbarui dengan dependensi PostgreSQL dan script test
 
 ### Dokumentasi
 - `SUPABASE_DATABASE_SETUP.md` - Panduan lengkap setup database dengan Supabase
@@ -64,6 +65,7 @@ npm run test-db
 2. **Realtime Features**: Supabase mendukung fitur realtime yang bisa digunakan dengan aplikasi ini
 3. **Free Tier**: Supabase menyediakan free tier yang cukup untuk pengembangan
 4. **SSL Connection**: Koneksi ke Supabase menggunakan SSL secara default (sudah dikonfigurasi)
+5. **Package.json**: File telah diperbaiki dan divalidasi untuk memastikan tidak ada error sintaks
 
 ## Troubleshooting Cepat
 
@@ -80,3 +82,7 @@ npm run test-db
 ### Masalah Database Schema
 1. Periksa tipe data yang kompatibel dengan PostgreSQL
 2. Sesuaikan ENUM dan AUTO_INCREMENT jika perlu
+
+### Masalah Package.json
+1. File telah diperbaiki untuk memastikan format JSON yang valid
+2. Dependensi PostgreSQL (`pg` dan `pg-hstore`) telah ditambahkan

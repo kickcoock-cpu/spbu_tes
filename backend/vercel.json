@@ -14,5 +14,8 @@
       "src": "/(.*)",
       "dest": "api.js"
     }
-  ]
+  ],
+  "env": {
+    "DB_DIALECT": "postgres"
+  }
 }
