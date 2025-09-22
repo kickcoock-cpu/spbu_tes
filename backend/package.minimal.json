@@ -1,0 +1,11 @@
+{
+  "name": "spbu-rbac-api",
+  "version": "1.0.0",
+  "main": "api.js",
+  "scripts": {
+    "build": "echo \"Building backend...\""
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
