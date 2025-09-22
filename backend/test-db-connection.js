@@ -1,42 +1,55 @@
-const mysql = require('mysql2');
+// File untuk mengetes koneksi database secara terpisah
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Database configuration from .env
-const config = {
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'root',
-  database: 'v4'
-};
+console.log('Menguji koneksi database...');
 
-console.log('Attempting to connect to MySQL database...');
+// Konfigurasi koneksi database
+const isPostgres = process.env.DB_DIALECT === 'postgres';
 
-const connection = mysql.createConnection(config);
+const sequelize = new Sequelize(
+  process.env.DB_NAME || (isPostgres ? 'postgres' : 'spbu_db'),
+  process.env.DB_USER || (isPostgres ? 'postgres' : 'root'),
+  process.env.DB_PASSWORD || '',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || (isPostgres ? 5432 : 3306),
+    dialect: isPostgres ? 'postgres' : 'mysql',
+    logging: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    ...(isPostgres && {
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      }
+    })
+  }
+);
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err.message);
+async function testConnection() {
+  try {
+    await sequelize.authenticate();
+    console.log(`Koneksi database berhasil dengan ${isPostgres ? 'PostgreSQL' : 'MySQL'}.`);
+    
+    // Coba query sederhana
+    const [results] = await sequelize.query('SELECT 1+1 as result');
+    console.log('Query test berhasil:', results[0].result);
+    
+    // Tutup koneksi
+    await sequelize.close();
+    console.log('Koneksi database ditutup.');
+    process.exit(0);
+  } catch (error) {
+    console.error('Koneksi database gagal:', error.message);
     process.exit(1);
   }
-  console.log('Successfully connected to MySQL database!');
-  
-  // Check if database exists
-  connection.query('SHOW DATABASES', (err, results) => {
-    if (err) {
-      console.error('Error fetching databases:', err.message);
-      connection.end();
-      process.exit(1);
-    }
-    
-    const databases = results.map(row => row.Database);
-    console.log('Available databases:', databases);
-    
-    if (databases.includes('v4')) {
-      console.log("Database 'v4' exists");
-    } else {
-      console.log("Database 'v4' does not exist");
-    }
-    
-    connection.end();
-  });
-});
+}
+
+testConnection();

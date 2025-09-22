@@ -1,22 +1,4 @@
-{
-  "name": "spbu-rbac-api",
-  "version": "1.0.0",
-  "description": "Backend API for SPBU management with RBAC",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "build": "echo \"Building backend...\"",
-    "test-db": "node test-supabase-connection.js",
-    "network": "node scripts/network-info.js",
-    "update-frontend": "node scripts/update-frontend-env.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "db:migrate": "sequelize-cli db:migrate",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo",
-    "db:seed:all": "sequelize-cli db:seed:all",
-    "db:seed:undo:all": "sequelize-cli db:seed:undo:all"
-  },
+{\n  \"name\": \"spbu-rbac-api\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Backend API for SPBU management with RBAC\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"node index.js\",\n    \"dev\": \"nodemon index.js\",\n    \"build\": \"echo \\\"Building backend...\\\"\",\n    \"test-db\": \"node test-db-connection.js\",\n    \"test-db-old\": \"node test-supabase-connection.js\",\n    \"network\": \"node scripts/network-info.js\",\n    \"update-frontend\": \"node scripts/update-frontend-env.js\",\n    \"test\": \"jest\",\n    \"test:watch\": \"jest --watch\",\n    \"db:migrate\": \"sequelize-cli db:migrate\",\n    \"db:migrate:undo\": \"sequelize-cli db:migrate:undo\",\n    \"db:seed:all\": \"sequelize-cli db:seed:all\",\n    \"db:seed:undo:all\": \"sequelize-cli db:seed:undo:all\"\n  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
