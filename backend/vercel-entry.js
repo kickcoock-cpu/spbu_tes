@@ -24,6 +24,18 @@ app.use(cors({
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
+// Logging middleware untuk debugging
+app.use((req, res, next) => {
+  console.log(`=== INCOMING REQUEST ===`);
+  console.log(`Method: ${req.method}`);
+  console.log(`URL: ${req.url}`);
+  console.log(`Headers:`, req.headers);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log(`Body:`, req.body);
+  }
+  next();
+});
+
 // Koneksi ke database
 connectDB().catch((error) => {
   console.error('Gagal menghubungkan ke database:', error);
@@ -60,6 +72,7 @@ app.get('/health', (req, res) => {
 
 // 404 handler
 app.use('*', (req, res) => {
+  console.log(`404 - Route not found: ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: 'Route not found'
@@ -68,7 +81,7 @@ app.use('*', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Global error handler:', err.stack);
   res.status(500).json({
     success: false,
     message: 'Something went wrong!',

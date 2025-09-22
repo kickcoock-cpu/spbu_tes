@@ -161,11 +161,6 @@ const loginUser = async (req, res) => {
         message: 'Invalid credentials'
       });
     }
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
 
     // Check if user is active
     if (!user.is_active) {
@@ -196,8 +191,14 @@ const loginUser = async (req, res) => {
       data: user
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({
       success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
       message: 'Server Error',
       error: error.message
     });
