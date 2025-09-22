@@ -1,0 +1,20 @@
+{\n  \"name\": \"spbu-rbac-api\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Backend API for SPBU management with RBAC\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"node index.js\",\n    \"dev\": \"nodemon index.js\",\n    \"build\": \"echo \\\"Building backend...\\\"\",\n    \"test-db\": \"node test-supabase-connection.js\",\n    \"network\": \"node scripts/network-info.js\",\n    \"update-frontend\": \"node scripts/update-frontend-env.js\",\n    \"test\": \"jest\",\n    \"test:watch\": \"jest --watch\",\n    \"db:migrate\": \"sequelize-cli db:migrate\",\n    \"db:migrate:undo\": \"sequelize-cli db:migrate:undo\",\n    \"db:seed:all\": \"sequelize-cli db:seed:all\",\n    \"db:seed:undo:all\": \"sequelize-cli db:seed:undo:all\"\n  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "mysql2": "^3.6.0",
+    "sequelize": "^6.32.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^6.3.3"
+  }
+}

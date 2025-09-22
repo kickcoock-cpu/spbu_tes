@@ -1,0 +1,49 @@
+const mysql = require('mysql2');
+
+// Database configuration from .env
+const config = {
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'root',
+  database: 'v4'
+};
+
+console.log('Creating users table...');
+
+const connection = mysql.createConnection(config);
+
+const createUsersTableQuery = `
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role_id INT NOT NULL,
+  spbu_id INT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  FOREIGN KEY (spbu_id) REFERENCES spbus(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+`;
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err.message);
+    process.exit(1);
+  }
+  console.log('Successfully connected to MySQL database!');
+  
+  connection.query(createUsersTableQuery, (err, results) => {
+    if (err) {
+      console.error('Error creating users table:', err.message);
+      connection.end();
+      process.exit(1);
+    }
+    
+    console.log('Users table created successfully');
+    connection.end();
+  });
+});

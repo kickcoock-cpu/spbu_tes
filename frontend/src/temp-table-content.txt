@@ -1,0 +1,59 @@
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Fuel Type</TableHead>
+                  <TableHead>Capacity (L)</TableHead>
+                  <TableHead>Current Stock (L)</TableHead>
+                  {user?.role.includes('Super Admin') && <TableHead>SPBU</TableHead>}
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tanks.map((tank) => (
+                  <TableRow key={tank.id}>
+                    <TableCell className="font-medium">{tank.name}</TableCell>
+                    <TableCell>{tank.fuel_type}</TableCell>
+                    <TableCell>{tank.capacity}</TableCell>
+                    <TableCell>{tank.current_stock}</TableCell>
+                    {user?.role.includes('Super Admin') && (
+                      <TableCell>
+                        {tank.SPBU?.name} ({tank.SPBU?.code})
+                      </TableCell>
+                    )}
+                    <TableCell className="text-right">
+                      {canEdit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="mr-2"
+                          onClick={() => {
+                            setEditForm({
+                              id: tank.id,
+                              name: tank.name,
+                              fuelType: tank.fuel_type,
+                              capacity: tank.capacity.toString(),
+                              currentStock: tank.current_stock.toString(),
+                              spbuId: tank.spbu_id?.toString() || ''
+                            })
+                            setEditDialogOpen(true)
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setTankToDelete(tank)
+                            setDeleteDialogOpen(true)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>

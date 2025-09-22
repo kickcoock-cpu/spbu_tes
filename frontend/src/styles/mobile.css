@@ -1,0 +1,64 @@
+/* Mobile-specific styles */
+@media (max-width: 767px) {
+  /* Adjust font sizes for better readability on mobile */
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+  }
+  
+  h3 {
+    font-size: 1.125rem;
+  }
+  
+  /* Adjust card padding for mobile */
+  .card {
+    padding: 1rem;
+  }
+  
+  /* Adjust button sizes for better touch targets */
+  .btn, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Adjust form elements for better touch targets */
+  input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Adjust table styles for mobile */
+  .table-mobile {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  /* Adjust grid layouts for mobile */
+  .grid-cols-1-sm {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-cols-2-sm {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  /* Adjust spacing for mobile */
+  .p-4-mobile {
+    padding: 1rem;
+  }
+  
+  .p-6-mobile {
+    padding: 1.5rem;
+  }
+  
+  .gap-4-mobile {
+    gap: 1rem;
+  }
+  
+  /* Adjust for mobile header */
+  .mobile-header-offset {
+    margin-top: 4rem;
+  }
+}

@@ -1,0 +1,6 @@
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { EditTank } from './edit'
+
+export const Route = createLazyFileRoute('/_authenticated/tanks/edit')({
+  component: EditTank,
+})

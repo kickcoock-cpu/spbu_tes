@@ -1,0 +1,446 @@
+const { Deposit, SPBU, User } = require('../models');
+const { recordDepositTransaction } = require('../utils/ledgerUtils');
+
+// @desc    Create deposit
+// @route   POST /api/deposits
+// @access  Private (Super Admin: full, Admin: full, Operator: limited)
+const createDeposit = async (req, res) => {
+  try {
+    const { amount, paymentMethod } = req.body;
+    
+    // Validate required fields
+    if (!amount || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
+      });
+    }
+    
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    // Get user's SPBU
+    let spbuId;
+    if (req.user.Role.name === 'Super Admin') {
+      // Super Admin can specify SPBU
+      spbuId = req.body.spbu_id;
+    } else {
+      // Admin and Operator use their assigned SPBU
+      spbuId = req.user.spbu_id;
+    }
+    
+    if (!spbuId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User must be assigned to an SPBU'
+      });
+    }
+    
+    // Create deposit
+    const deposit = await Deposit.create({
+      spbu_id: spbuId,
+      operator_id: req.user.Role.name === 'Operator' ? req.user.id : null,
+      amount,
+      payment_method: paymentMethod
+    });
+    
+    // Get deposit with related data
+    const depositWithDetails = await Deposit.findByPk(deposit.id, {
+      include: [
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: User, as: 'operator', attributes: ['name'] },
+        { model: User, as: 'depositor_approver', attributes: ['name'] },
+        { model: User, as: 'depositor_rejector', attributes: ['name'] }
+      ]
+    });
+    
+    res.status(201).json({
+      success: true,
+      data: depositWithDetails
+    });
+  } catch (error) {
+    console.error('Error in createDeposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get all deposits
+// @route   GET /api/deposits
+// @access  Private (Super Admin: full, Admin: full, Operator: read-only)
+const getDeposits = async (req, res) => {
+  try {
+    let deposits;
+    
+    const includeOptions = [
+      { model: SPBU, attributes: ['name', 'code'] },
+      { model: User, as: 'operator', attributes: ['name'] },
+      { model: User, as: 'depositor_approver', attributes: ['name'] },
+      { model: User, as: 'depositor_rejector', attributes: ['name'] }
+    ];
+    
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    if (req.user.Role.name === 'Super Admin') {
+      // Super Admin sees all deposits
+      deposits = await Deposit.findAll({ include: includeOptions });
+    } else if (req.user.Role.name === 'Admin') {
+      // Check if admin has spbu_id
+      if (!req.user.spbu_id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Admin user must be assigned to an SPBU'
+        });
+      }
+      
+      // Admin sees only deposits from their SPBU
+      deposits = await Deposit.findAll({ 
+        where: { spbu_id: req.user.spbu_id },
+        include: includeOptions
+      });
+    } else if (req.user.Role.name === 'Operator') {
+      // Check if operator has spbu_id
+      if (!req.user.spbu_id) {
+        return res.status(400).json({
+          success: false,
+          message: 'Operator user must be assigned to an SPBU'
+        });
+      }
+      
+      // Operator sees only deposits from their SPBU
+      deposits = await Deposit.findAll({ 
+        where: { spbu_id: req.user.spbu_id },
+        include: includeOptions
+      });
+    } else {
+      // Other roles don't have access to view deposits list
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Insufficient permissions to view deposits.'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      count: deposits.length,
+      data: deposits
+    });
+  } catch (error) {
+    console.error('Error in getDeposits:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Get single deposit
+// @route   GET /api/deposits/:id
+// @access  Private (Super Admin: full, Admin: full, Operator: read-only)
+const getDeposit = async (req, res) => {
+  try {
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    const deposit = await Deposit.findByPk(req.params.id, {
+      include: [
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: User, as: 'operator', attributes: ['name'] },
+        { model: User, as: 'depositor_approver', attributes: ['name'] },
+        { model: User, as: 'depositor_rejector', attributes: ['name'] }
+      ]
+    });
+    
+    if (!deposit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deposit not found'
+      });
+    }
+    
+    // Check if user has permission to view this deposit
+    if ((req.user.Role.name === 'Admin' || req.user.Role.name === 'Operator') && deposit.spbu_id !== req.user.spbu_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this deposit'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: deposit
+    });
+  } catch (error) {
+    console.error('Error in getDeposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Update deposit
+// @route   PUT /api/deposits/:id
+// @access  Private (Super Admin: full, Admin: full, Operator: none)
+const updateDeposit = async (req, res) => {
+  try {
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    let deposit = await Deposit.findByPk(req.params.id);
+    
+    if (!deposit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deposit not found'
+      });
+    }
+    
+    // Check if user has permission to update this deposit
+    if (req.user.Role.name === 'Admin' && deposit.spbu_id !== req.user.spbu_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this deposit'
+      });
+    }
+    
+    deposit = await deposit.update(req.body);
+    
+    // Get updated deposit with related data
+    const updatedDeposit = await Deposit.findByPk(deposit.id, {
+      include: [
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: User, as: 'operator', attributes: ['name'] },
+        { model: User, as: 'depositor_approver', attributes: ['name'] },
+        { model: User, as: 'depositor_rejector', attributes: ['name'] }
+      ]
+    });
+    
+    res.status(200).json({
+      success: true,
+      data: updatedDeposit
+    });
+  } catch (error) {
+    console.error('Error in updateDeposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Approve deposit
+// @route   PUT /api/deposits/:id/approve
+// @access  Private (Super Admin: full, Admin: full, Operator: none)
+// FUNCTION: APPROVE_DEPOSIT_START
+const approveDeposit = async (req, res) => {
+  try {
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    // Check if user has an id
+    if (!req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is missing'
+      });
+    }
+    
+    // Only Super Admin and Admin can approve deposits
+    if (req.user.Role.name !== 'Super Admin' && req.user.Role.name !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Super Admin and Admin can approve deposits.'
+      });
+    }
+    
+    let deposit = await Deposit.findByPk(req.params.id);
+    
+    if (!deposit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deposit not found'
+      });
+    }
+    
+    // Check if user has permission to approve this deposit
+    if (req.user.Role.name === 'Admin' && deposit.spbu_id !== req.user.spbu_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to approve this deposit'
+      });
+    }
+    
+    // Update deposit status to approved
+    deposit.status = 'approved';
+    deposit.approved_by = req.user.id;
+    deposit = await deposit.save();
+    
+    // Get updated deposit with related data
+    const updatedDeposit = await Deposit.findByPk(deposit.id, {
+      include: [
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: User, as: 'operator', attributes: ['name'] },
+        { model: User, as: 'depositor_approver', attributes: ['name'] },
+        { model: User, as: 'depositor_rejector', attributes: ['name'] }
+      ]
+    });
+    
+    // Record deposit transaction in ledger for APPROVE function
+    try {
+      await recordDepositTransaction({
+        spbu_id: deposit.spbu_id,
+        id: deposit.id,
+        amount: deposit.amount,
+        created_by: req.user.id,
+        status: 'approved'
+      });
+    } catch (ledgerError) {
+      console.error('Error recording deposit transaction in ledger:', ledgerError);
+      // Continue with the response even if ledger recording fails
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: updatedDeposit
+    });
+  } catch (error) {
+    console.error('Error in approveDeposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Reject deposit
+// @route   PUT /api/deposits/:id/reject
+// @access  Private (Super Admin: full, Admin: full, Operator: none)
+// FUNCTION: REJECT_DEPOSIT_START
+const rejectDeposit = async (req, res) => {
+  try {
+    // Check if user and role exist
+    if (!req.user || !req.user.Role || !req.user.Role.name) {
+      return res.status(400).json({
+        success: false,
+        message: 'User role information is missing'
+      });
+    }
+    
+    // Check if user has an id
+    if (!req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is missing'
+      });
+    }
+    
+    // Only Super Admin and Admin can reject deposits
+    if (req.user.Role.name !== 'Super Admin' && req.user.Role.name !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Super Admin and Admin can reject deposits.'
+      });
+    }
+    
+    let deposit = await Deposit.findByPk(req.params.id);
+    
+    if (!deposit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Deposit not found'
+      });
+    }
+    
+    // Check if user has permission to reject this deposit
+    if (req.user.Role.name === 'Admin' && deposit.spbu_id !== req.user.spbu_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to reject this deposit'
+      });
+    }
+    
+    // Update deposit status to rejected
+    deposit.status = 'rejected';
+    deposit.rejected_by = req.user.id;
+    deposit = await deposit.save();
+    
+    // Get updated deposit with related data
+    const updatedDeposit = await Deposit.findByPk(deposit.id, {
+      include: [
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: User, as: 'operator', attributes: ['name'] },
+        { model: User, as: 'depositor_approver', attributes: ['name'] },
+        { model: User, as: 'depositor_rejector', attributes: ['name'] }
+      ]
+    });
+    
+    // Record deposit transaction in ledger for REJECT function
+    try {
+      await recordDepositTransaction({
+        spbu_id: deposit.spbu_id,
+        id: deposit.id,
+        amount: deposit.amount,
+        created_by: req.user.id,
+        status: 'rejected'
+      });
+    } catch (ledgerError) {
+      console.error('Error recording deposit transaction in ledger:', ledgerError);
+      // Continue with the response even if ledger recording fails
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: updatedDeposit
+    });
+  } catch (error) {
+    console.error('Error in rejectDeposit:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message
+    });
+  }
+};
+
+module.exports = {
+  createDeposit,
+  getDeposits,
+  getDeposit,
+  updateDeposit,
+  approveDeposit,
+  rejectDeposit
+};
