@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+const { protect, authorize } = require('../middleware/auth');
 const { getRoles } = require('../controllers/roleController');
 
 // Get all roles

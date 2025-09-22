@@ -1,29 +1,32 @@
-// test-routes.js
+// Test script to identify which route is causing the issue
 const fs = require('fs');
 const path = require('path');
 
 const routesDir = path.join(__dirname, 'routes');
 
-// Check all route files
-fs.readdir(routesDir, (err, files) => {
-  if (err) {
-    console.error('Error reading routes directory:', err);
-    return;
-  }
+// Get all route files
+const routeFiles = fs.readdirSync(routesDir).filter(file => file.endsWith('.js'));
 
-  files.forEach(file => {
-    if (file.endsWith('.js')) {
-      try {
-        const routeModule = require(path.join(routesDir, file));
-        console.log(`${file}:`, typeof routeModule, routeModule.constructor.name);
-        
-        // Check if it's a function or router
-        if (typeof routeModule !== 'function' && !routeModule.use) {
-          console.log(`  WARNING: ${file} may not export a proper router`);
-        }
-      } catch (err) {
-        console.error(`Error loading ${file}:`, err.message);
-      }
+console.log('Testing route exports...');
+
+routeFiles.forEach(file => {
+  try {
+    const routePath = path.join(routesDir, file);
+    const route = require(routePath);
+    
+    // Check if it's a valid Express router
+    if (route && typeof route === 'function' && route.name === 'router') {
+      console.log(`${file}: ✓ Valid Express router`);
+    } else if (route && typeof route === 'object' && route.constructor.name === 'Router') {
+      console.log(`${file}: ✓ Valid Express router (object)`);
+    } else {
+      console.log(`${file}: ✗ Invalid export - not a router`);
+      console.log(`  Type: ${typeof route}`);
+      console.log(`  Constructor: ${route ? route.constructor.name : 'null'}`);
     }
-  });
+  } catch (error) {
+    console.log(`${file}: ✗ Error importing - ${error.message}`);
+  }
 });
+
+console.log('Test complete.');
