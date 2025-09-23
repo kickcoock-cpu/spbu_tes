@@ -313,7 +313,7 @@ const getDashboard = async (req, res) => {
         return {
           id: tank.id,
           name: tank.name,
-          fuelType: tank.fuel_type,
+          fuelType: tank.FuelType ? tank.FuelType.name : 'Unknown',
           capacity: parseFloat(tank.capacity),
           currentStock: parseFloat(tank.current_stock),
           percentage: percentage

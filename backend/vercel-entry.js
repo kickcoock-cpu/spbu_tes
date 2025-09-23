@@ -106,7 +106,6 @@ const corsOptions = {
       'https://pertashop-six.vercel.app',
       'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
       'https://simontok-ps.vercel.app',
-      'https://simontok-nu.vercel.app',
       // Tambahkan domain frontend lain jika ada
     ];
     
@@ -205,7 +204,6 @@ module.exports = (req, res) => {
     'https://pertashop-six.vercel.app',
     'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
     'https://simontok-ps.vercel.app',
-    'https://simontok-nu.vercel.app',
     // Tambahkan domain frontend lain jika ada
   ];
   
