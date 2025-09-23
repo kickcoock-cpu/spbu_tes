@@ -24,7 +24,8 @@ const getSalesByOperator = async (req, res) => {
     
     const includeOptions = [
       { model: SPBU, attributes: ['name', 'code'] },
-      { model: User, as: 'operator', attributes: ['name', 'email'] }
+      { model: User, as: 'operator', attributes: ['name', 'email'] },
+      { model: FuelType, attributes: ['name'] }
     ];
     
     if (req.user.Role.name === 'Super Admin') {
@@ -150,7 +151,7 @@ const createSale = async (req, res) => {
         transaction_id: await generateTransactionId(),
         spbu_id: spbuId,
         operator_id: req.user.id,
-        fuel_type,
+        fuel_type_id: fuel_type, // fuel_type sebenarnya adalah ID dari fuel_types
         liters,
         amount
       }, { transaction });
@@ -190,7 +191,7 @@ const createSale = async (req, res) => {
         await recordSaleTransaction({
           spbu_id: sale.spbu_id,
           id: sale.id,
-          fuel_type: sale.fuel_type,
+          fuel_type: sale.FuelType ? sale.FuelType.name : 'Unknown',
           liters: sale.liters,
           amount: sale.amount,
           operator_id: sale.operator_id
@@ -227,7 +228,8 @@ const getSales = async (req, res) => {
     
     const includeOptions = [
       { model: SPBU, attributes: ['name', 'code'] },
-      { model: User, as: 'operator', attributes: ['name', 'email'] }
+      { model: User, as: 'operator', attributes: ['name', 'email'] },
+      { model: FuelType, attributes: ['name'] }
     ];
     
     if (req.user.Role.name === 'Super Admin') {
@@ -276,7 +278,8 @@ const getSale = async (req, res) => {
     const sale = await Sale.findByPk(req.params.id, {
       include: [
         { model: SPBU, attributes: ['name', 'code'] },
-        { model: User, as: 'operator', attributes: ['name', 'email'] }
+        { model: User, as: 'operator', attributes: ['name', 'email'] },
+        { model: FuelType, attributes: ['name'] }
       ]
     });
     
