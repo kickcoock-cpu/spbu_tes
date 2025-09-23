@@ -1,4 +1,5 @@
 // File untuk mengetes koneksi database Supabase secara terpisah
+require('dotenv').config({ path: '.env.vercel' }); // Load .env.vercel file
 const { connectDB } = require('./config/supabase-db');
 
 console.log('=== Supabase Database Connection Test ===');

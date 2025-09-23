@@ -37,3 +37,4 @@ build/
 
 # Sequelize
 sequelize-meta.json
+.vercel

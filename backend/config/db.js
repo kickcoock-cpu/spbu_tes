@@ -7,46 +7,59 @@ let sequelize;
 try {
   console.log('=== DATABASE CONFIGURATION START ===');
   
-  // Gunakan environment variables yang benar dari .env.vercel
-  // Jika tidak ada, gunakan default yang benar
-  const dbHost = process.env.DB_HOST || 'aws-1-us-east-1.pooler.supabase.com';
-  const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
-  const dbName = process.env.DB_NAME || 'postgres';
-  const dbPassword = process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO'; // Password yang benar
-  const dbPort = process.env.DB_PORT || 5432;
-  const dbDialect = process.env.DB_DIALECT || 'postgres';
-  
-  console.log('Database configuration (final):');
-  console.log('- Host:', dbHost);
-  console.log('- User:', dbUser);
-  console.log('- Database:', dbName);
-  console.log('- Port:', dbPort);
-  console.log('- Dialect:', dbDialect);
-
-  sequelize = new Sequelize(
-    dbName,
-    dbUser,
-    dbPassword,
-    {
-      host: dbHost,
-      port: parseInt(dbPort),
-      dialect: dbDialect,
+  // Gunakan connection string jika tersedia
+  if (process.env.POSTGRES_URL) {
+    console.log('Using connection string for database connection');
+    sequelize = new Sequelize(process.env.POSTGRES_URL, {
       logging: console.log, // Enable logging untuk debugging
-      pool: {
-        max: 10,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-      },
       dialectOptions: {
         ssl: {
           require: true,
           rejectUnauthorized: false
         }
-      },
-      ssl: true
-    }
-  );
+      }
+    });
+  } else {
+    // Gunakan environment variables yang benar dari .env.vercel
+    const dbHost = process.env.DB_HOST || 'aws-1-us-east-1.pooler.supabase.com';
+    const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
+    const dbName = process.env.DB_NAME || 'postgres';
+    const dbPassword = process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO';
+    const dbPort = process.env.DB_PORT || 6543;
+    const dbDialect = process.env.DB_DIALECT || 'postgres';
+    
+    console.log('Database configuration (final):');
+    console.log('- Host:', dbHost);
+    console.log('- User:', dbUser);
+    console.log('- Database:', dbName);
+    console.log('- Port:', dbPort);
+    console.log('- Dialect:', dbDialect);
+
+    sequelize = new Sequelize(
+      dbName,
+      dbUser,
+      dbPassword,
+      {
+        host: dbHost,
+        port: parseInt(dbPort),
+        dialect: dbDialect,
+        logging: console.log, // Enable logging untuk debugging
+        pool: {
+          max: 10,
+          min: 0,
+          acquire: 30000,
+          idle: 10000
+        },
+        dialectOptions: {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false
+          }
+        },
+        ssl: true
+      }
+    );
+  }
 
   console.log('=== DATABASE CONFIGURATION COMPLETE ===');
 } catch (error) {

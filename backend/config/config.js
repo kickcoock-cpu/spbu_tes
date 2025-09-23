@@ -1,10 +1,11 @@
-require('dotenv').config();
+require('dotenv').config({ path: '.env.vercel' }); // Load .env.vercel file
 
 // Fungsi untuk mendeteksi apakah kita menggunakan PostgreSQL/Supabase
 const isPostgres = () => {
   return process.env.DB_DIALECT === 'postgres' || 
          (process.env.DB_HOST && process.env.DB_HOST.includes('supabase')) ||
-         (process.env.SUPABASE_URL !== undefined);
+         (process.env.SUPABASE_URL !== undefined) ||
+         (process.env.POSTGRES_URL !== undefined);
 };
 
 module.exports = {
