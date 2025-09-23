@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.vercel' }); // Load .env.vercel file
 
 // Konfigurasi koneksi database - mendukung baik MySQL maupun PostgreSQL (Supabase)
 let sequelize;
@@ -7,18 +7,20 @@ let sequelize;
 try {
   console.log('=== DATABASE CONFIGURATION START ===');
   
-  // Gunakan credential default Supabase untuk testing
-  const dbHost = 'db.eqwnpfuuwpdsacyvdrvj.supabase.co';
-  const dbUser = 'postgres'; // Gunakan postgres tanpa project reference dulu
-  const dbName = 'postgres';
-  const dbPassword = 'Pertamina1*';
-  const dbPort = 5432;
+  // Gunakan environment variables dari .env.vercel
+  const dbHost = process.env.DB_HOST || 'aws-0-us-west-1.pooler.supabase.com';
+  const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
+  const dbName = process.env.DB_NAME || 'postgres';
+  const dbPassword = process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO'; // Password yang benar
+  const dbPort = process.env.DB_PORT || 5432;
+  const dbDialect = process.env.DB_DIALECT || 'postgres';
   
-  console.log('Database configuration:');
+  console.log('Database configuration from .env.vercel:');
   console.log('- Host:', dbHost);
   console.log('- User:', dbUser);
   console.log('- Database:', dbName);
   console.log('- Port:', dbPort);
+  console.log('- Dialect:', dbDialect);
 
   sequelize = new Sequelize(
     dbName,
@@ -26,8 +28,8 @@ try {
     dbPassword,
     {
       host: dbHost,
-      port: dbPort,
-      dialect: 'postgres',
+      port: parseInt(dbPort),
+      dialect: dbDialect,
       logging: console.log, // Enable logging untuk debugging
       pool: {
         max: 10,
@@ -59,11 +61,16 @@ const connectDB = async () => {
     
     // Cek apakah dependensi tersedia
     try {
-      require('pg');
-      console.log('PostgreSQL driver available');
+      if (sequelize.getDialect() === 'postgres') {
+        require('pg');
+        console.log('PostgreSQL driver available');
+      } else {
+        require('mysql2');
+        console.log('MySQL driver available');
+      }
     } catch (err) {
-      console.error('PostgreSQL driver not found. Please install pg package.');
-      throw new Error('PostgreSQL driver not found');
+      console.error('Database driver not found. Please install required driver.');
+      throw new Error('Database driver not found');
     }
 
     console.log('Attempting to connect to database...');
@@ -76,7 +83,8 @@ const connectDB = async () => {
     });
     
     await sequelize.authenticate();
-    console.log('✅ Koneksi database berhasil terestablish dengan Supabase/PostgreSQL.');
+    console.log('✅ Koneksi database berhasil terestablish dengan ' + 
+                (sequelize.getDialect() === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL') + '.');
     
     // Test query sederhana
     try {
@@ -88,7 +96,7 @@ const connectDB = async () => {
     }
   } catch (error) {
     console.error('=== DATABASE CONNECTION ERROR ===');
-    console.error('Tidak dapat terhubung ke database Supabase/PostgreSQL:', error);
+    console.error('Tidak dapat terhubung ke database:', error);
     throw error;
   }
 };
