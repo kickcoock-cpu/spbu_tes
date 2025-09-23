@@ -15,7 +15,7 @@ try {
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false
+          rejectUnauthorized: false // This is important for avoiding self-signed certificate issues
         }
       }
     });
@@ -53,7 +53,7 @@ try {
         dialectOptions: {
           ssl: {
             require: true,
-            rejectUnauthorized: false
+            rejectUnauthorized: false // This is important for avoiding self-signed certificate issues
           }
         },
         ssl: true

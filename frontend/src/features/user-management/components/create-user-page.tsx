@@ -50,7 +50,7 @@ const fetchSPBUs = async (): Promise<SPBU[]> => {
 }
 
 const createUser = async (userData: any) => {
-  const response = await apiClient.post('/api/users/', userData)
+  const response = await apiClient.post('/api/users', userData)
   return response.data
 }
 

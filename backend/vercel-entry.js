@@ -10,10 +10,79 @@ console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PASSWORD present:', !!process.env.DB_PASSWORD);
 console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('VERCEL:', process.env.VERCEL);
+console.log('POSTGRES_URL:', process.env.POSTGRES_URL);
 console.log('==============================');
 
-// Inisialisasi koneksi database
-const { connectDB } = require('./config/db');
+// Inisialisasi koneksi database dengan konfigurasi khusus untuk Vercel
+let sequelize;
+try {
+  const { Sequelize } = require('sequelize');
+  
+  // Gunakan connection string jika tersedia
+  if (process.env.POSTGRES_URL) {
+    console.log('Using connection string for Vercel database connection');
+    sequelize = new Sequelize(process.env.POSTGRES_URL, {
+      logging: false,
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      },
+      ssl: true
+    });
+  } else {
+    // Fallback ke konfigurasi manual dengan SSL settings yang lebih eksplisit
+    sequelize = new Sequelize(
+      process.env.DB_NAME || 'postgres',
+      process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj',
+      process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO',
+      {
+        host: process.env.DB_HOST || 'aws-1-us-east-1.pooler.supabase.com',
+        port: process.env.DB_PORT || 6543,
+        dialect: 'postgres',
+        logging: false,
+        dialectOptions: {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false
+          }
+        },
+        ssl: true,
+        pool: {
+          max: 5,
+          min: 0,
+          acquire: 30000,
+          idle: 10000
+        }
+      }
+    );
+  }
+  
+  // Test koneksi
+  sequelize.authenticate()
+    .then(() => {
+      console.log('✅ Database connection established for Vercel');
+    })
+    .catch(err => {
+      console.error('❌ Unable to connect to the database in Vercel:', err.message);
+    });
+} catch (error) {
+  console.error('❌ Error initializing database connection:', error);
+}
+
+// Fungsi connectDB khusus untuk Vercel
+const connectDB = async () => {
+  try {
+    if (sequelize) {
+      await sequelize.authenticate();
+      console.log('✅ Koneksi database berhasil terestablish di Vercel.');
+    }
+  } catch (error) {
+    console.error('❌ Gagal menghubungkan ke database di Vercel:', error);
+  }
+};
 
 // Inisialisasi aplikasi Express
 const app = express();
