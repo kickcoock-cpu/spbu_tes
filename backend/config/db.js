@@ -5,23 +5,16 @@ require('dotenv').config();
 let sequelize;
 
 try {
-  // Cek apakah kita menggunakan Supabase/PostgreSQL berdasarkan environment
-  const isPostgres = process.env.DB_DIALECT === 'postgres' || 
-                    (process.env.DB_HOST && process.env.DB_HOST.includes('supabase')) ||
-                    (process.env.SUPABASE_URL !== undefined);
-
-  console.log('Database dialect detected:', isPostgres ? 'PostgreSQL' : 'MySQL');
-  console.log('DB_HOST:', process.env.DB_HOST);
-  console.log('DB_DIALECT:', process.env.DB_DIALECT);
-
-  // Hardcode values yang benar untuk menghindari masalah environment variables lama
-  const dbHost = 'aws-0-us-west-1.pooler.supabase.com';
-  const dbUser = 'postgres.eqwnpfuuwpdsacyvdrvj';
+  console.log('=== DATABASE CONFIGURATION START ===');
+  
+  // Gunakan credential default Supabase untuk testing
+  const dbHost = 'db.eqwnpfuuwpdsacyvdrvj.supabase.co';
+  const dbUser = 'postgres'; // Gunakan postgres tanpa project reference dulu
   const dbName = 'postgres';
   const dbPassword = 'Pertamina1*';
   const dbPort = 5432;
   
-  console.log('Using hardcoded database configuration:');
+  console.log('Database configuration:');
   console.log('- Host:', dbHost);
   console.log('- User:', dbUser);
   console.log('- Database:', dbName);
@@ -35,7 +28,7 @@ try {
       host: dbHost,
       port: dbPort,
       dialect: 'postgres',
-      logging: false, // Set ke true jika ingin melihat query SQL di console
+      logging: console.log, // Enable logging untuk debugging
       pool: {
         max: 10,
         min: 0,
@@ -52,8 +45,9 @@ try {
     }
   );
 
-  console.log(`Database configured for PostgreSQL/Supabase`);
+  console.log('=== DATABASE CONFIGURATION COMPLETE ===');
 } catch (error) {
+  console.error('=== DATABASE CONFIGURATION ERROR ===');
   console.error('Error configuring database:', error);
   throw error;
 }
@@ -61,27 +55,19 @@ try {
 // Fungsi untuk menguji koneksi
 const connectDB = async () => {
   try {
+    console.log('=== DATABASE CONNECTION ATTEMPT ===');
+    
     // Cek apakah dependensi tersedia
-    if (sequelize.getDialect() === 'postgres') {
-      try {
-        require('pg');
-        console.log('PostgreSQL driver available');
-      } catch (err) {
-        console.error('PostgreSQL driver not found. Please install pg package.');
-        throw new Error('PostgreSQL driver not found');
-      }
-    } else {
-      try {
-        require('mysql2');
-        console.log('MySQL driver available');
-      } catch (err) {
-        console.error('MySQL driver not found. Please install mysql2 package.');
-        throw new Error('MySQL driver not found');
-      }
+    try {
+      require('pg');
+      console.log('PostgreSQL driver available');
+    } catch (err) {
+      console.error('PostgreSQL driver not found. Please install pg package.');
+      throw new Error('PostgreSQL driver not found');
     }
 
     console.log('Attempting to connect to database...');
-    console.log('Database config:', {
+    console.log('Connection config:', {
       host: sequelize.config.host,
       port: sequelize.config.port,
       database: sequelize.config.database,
@@ -90,23 +76,19 @@ const connectDB = async () => {
     });
     
     await sequelize.authenticate();
-    console.log(`Koneksi database berhasil terestablish dengan ${sequelize.getDialect() === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'}.`);
+    console.log('✅ Koneksi database berhasil terestablish dengan Supabase/PostgreSQL.');
     
-    // Jika SYNC_DATABASE diatur ke true, sinkronkan model
-    if (process.env.SYNC_DATABASE === 'true') {
-      await sequelize.sync({ alter: true });
-      console.log('Semua model telah disinkronkan.');
+    // Test query sederhana
+    try {
+      console.log('Testing database connection with simple query...');
+      const result = await sequelize.query('SELECT 1 as test');
+      console.log('✅ Database query test successful:', result);
+    } catch (queryError) {
+      console.error('❌ Database query test failed:', queryError);
     }
   } catch (error) {
-    console.error(`Tidak dapat terhubung ke database ${sequelize.getDialect() === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'}:`, error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      syscall: error.syscall,
-      hostname: error.hostname,
-      host: error.host,
-      port: error.port
-    });
+    console.error('=== DATABASE CONNECTION ERROR ===');
+    console.error('Tidak dapat terhubung ke database Supabase/PostgreSQL:', error);
     throw error;
   }
 };

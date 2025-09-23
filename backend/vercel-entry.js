@@ -4,9 +4,13 @@ const cors = require('cors');
 require('dotenv').config({ path: '.env.vercel' });
 
 // Log environment variables for debugging (remove in production)
+console.log('=== ENVIRONMENT VARIABLES ===');
 console.log('DB_DIALECT:', process.env.DB_DIALECT);
 console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_USER:', process.env.DB_USER);
+console.log('DB_PASSWORD present:', !!process.env.DB_PASSWORD);
 console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('==============================');
 
 // Inisialisasi koneksi database
 const { connectDB } = require('./config/db');
@@ -26,11 +30,11 @@ const corsOptions = {
     }
     
     // Untuk produksi, tentukan origin yang diizinkan
-    // Ganti dengan domain frontend Anda
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:3000',
-      'https://pertashop-six.vercel.app', // Ganti dengan URL frontend Anda
+      'https://spbu-tes.vercel.app',
+      'https://pertashop-six.vercel.app',
       // Tambahkan domain frontend lain jika ada
     ];
     
@@ -40,7 +44,7 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Izinkan cookies dan credentials
+  credentials: true,
   optionsSuccessStatus: 200
 };
 
@@ -54,16 +58,16 @@ app.use((req, res, next) => {
   console.log(`Method: ${req.method}`);
   console.log(`URL: ${req.url}`);
   console.log(`Origin: ${req.headers.origin}`);
-  console.log(`Headers:`, req.headers);
   if (req.body && Object.keys(req.body).length > 0) {
     console.log(`Body:`, req.body);
   }
   next();
 });
 
-// Koneksi ke database
+// Koneksi ke database dengan error handling
 connectDB().catch((error) => {
-  console.error('Gagal menghubungkan ke database:', error);
+  console.error('❌ Gagal menghubungkan ke database:', error);
+  // Jangan throw error agar server tetap bisa jalan untuk health check
 });
 
 // Routes
@@ -91,7 +95,7 @@ app.get('/health', (req, res) => {
     success: true,
     message: 'Server is running',
     timestamp: new Date().toISOString(),
-    database: process.env.DB_DIALECT === 'postgres' ? 'Supabase/PostgreSQL' : 'MySQL'
+    database: 'PostgreSQL/Supabase'
   });
 });
 
