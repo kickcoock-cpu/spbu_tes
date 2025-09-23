@@ -39,14 +39,21 @@ apiClient.interceptors.request.use(
     console.log('Cookie token:', cookieToken ? 'Present' : 'Missing');
     console.log('Store token:', storeToken ? 'Present' : 'Missing');
     
+    // Use the token from either source
     const token = cookieToken || storeToken;
     
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      console.log('Authorization header set with token (first 20 chars):', token.substring(0, 20) + '...');
+      // Ensure the token is a string (not an object)
+      const tokenString = typeof token === 'string' ? token : JSON.stringify(token);
+      config.headers.Authorization = `Bearer ${tokenString}`;
+      console.log('Authorization header set with token (first 20 chars):', tokenString.substring(0, 20) + '...');
     } else {
       console.log('No token available for Authorization header');
     }
+    
+    // Log the complete headers for debugging
+    console.log('Complete headers:', config.headers);
+    
     return config;
   },
   (error) => {

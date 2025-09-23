@@ -78,8 +78,11 @@ export const useAuthStore = create<AuthState>()((set) => {
       accessToken: initToken,
       setAccessToken: (accessToken) => {
         set((state) => {
-          setCookie(ACCESS_TOKEN, accessToken, 60 * 60 * 24 * 7) // Simpan selama 7 hari
-          return { ...state, auth: { ...state.auth, accessToken } }
+          console.log('Setting access token in auth store:', accessToken);
+          // Ensure accessToken is a string
+          const tokenString = typeof accessToken === 'string' ? accessToken : JSON.stringify(accessToken);
+          setCookie(ACCESS_TOKEN, tokenString, 60 * 60 * 24 * 7) // Simpan selama 7 hari
+          return { ...state, auth: { ...state.auth, accessToken: tokenString } }
         })
       },
       resetAccessToken: () => {

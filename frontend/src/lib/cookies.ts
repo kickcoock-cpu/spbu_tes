@@ -30,7 +30,16 @@ export function setCookie(
 ): void {
   if (typeof document === 'undefined') return
 
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`
+  // For Vercel deployments, we need to set the cookie properly
+  const isVercel = window.location.hostname.includes('vercel.app');
+  
+  if (isVercel) {
+    // For Vercel, set cookie for the current domain
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`
+  } else {
+    // For local development
+    document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`
+  }
 }
 
 /**
@@ -39,5 +48,14 @@ export function setCookie(
 export function removeCookie(name: string): void {
   if (typeof document === 'undefined') return
 
-  document.cookie = `${name}=; path=/; max-age=0`
+  // For Vercel deployments, we need to remove the cookie properly
+  const isVercel = window.location.hostname.includes('vercel.app');
+  
+  if (isVercel) {
+    // For Vercel, remove cookie for the current domain
+    document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`
+  } else {
+    // For local development
+    document.cookie = `${name}=; path=/; max-age=0`
+  }
 }

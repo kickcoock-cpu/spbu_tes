@@ -70,6 +70,10 @@ export function UserAuthForm({
       // Extract user and token from response
       const { token, data: userData } = response.data
 
+      console.log('Login response data:', response.data);
+      console.log('Token received:', token);
+      console.log('User data received:', userData);
+
       // Transform user data to match the expected structure
       const transformedUser = {
         accountNo: userData.username,
@@ -79,6 +83,8 @@ export function UserAuthForm({
         role: [userData.Role?.name || 'User'],
         exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days from now
       }
+
+      console.log('Transformed user:', transformedUser);
 
       // Set user and access token
       auth.setUser(transformedUser)
