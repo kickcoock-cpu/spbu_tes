@@ -251,41 +251,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Export handler untuk Vercel
-export default (req, res) => {
-  // Set CORS headers secara manual untuk OPTIONS request
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://spbu-tes.vercel.app',
-    'https://pertashop-six.vercel.app',
-    'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
-    'https://simontok-ps.vercel.app',
-    'https://simontok-api.vercel.app', // Tambahkan origin API
-    // Tambahkan domain frontend lain jika ada
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (!origin) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  // Pass request to express app
-  return app(req, res);
-};
-
 // Untuk development local
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
