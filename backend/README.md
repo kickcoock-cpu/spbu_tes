@@ -59,7 +59,7 @@ The database seeders will populate the database with the following dummy data:
 - **40 Adjustments** requests
 - **100 Audit Logs** for tracking activities
 
-All users are created with the password: `password123`
+All users are created with the standardized password: `Pertamina1*`
 
 ## Environment Variables
 

@@ -1,4 +1,5 @@
 // Seeder untuk membuat data awal di Supabase
+// Password standardized to 'Pertamina1*' for all users
 const { sequelize } = require('../config/db');
 const { Role, User, SPBU, Tank } = require('../models');
 const bcrypt = require('bcryptjs');
@@ -29,7 +30,7 @@ const seedData = {
       name: 'Super Administrator',
       username: 'superadmin',
       email: 'superadmin@spbu.com',
-      password: 'Pertamina1*', // Akan dihash
+      password: 'Pertamina1*', // Standardized password for all users
       role: 'Super Admin',
       spbu_code: null, // Super Admin tidak terikat ke SPBU tertentu
       is_active: true
@@ -38,7 +39,7 @@ const seedData = {
       name: 'Admin SPBU 1',
       username: 'admin1',
       email: 'admin1@spbu.com',
-      password: 'Pertamina1*', // Akan dihash
+      password: 'Pertamina1*', // Standardized password for all users
       role: 'Admin',
       spbu_code: 'SPBU-001',
       is_active: true
@@ -47,7 +48,7 @@ const seedData = {
       name: 'Operator SPBU 1',
       username: 'operator1',
       email: 'operator1@spbu.com',
-      password: 'Pertamina1*', // Akan dihash
+      password: 'Pertamina1*', // Standardized password for all users
       role: 'Operator',
       spbu_code: 'SPBU-001',
       is_active: true
@@ -56,7 +57,7 @@ const seedData = {
       name: 'Admin SPBU 2',
       username: 'admin2',
       email: 'admin2@spbu.com',
-      password: 'Pertamina1*', // Akan dihash
+      password: 'Pertamina1*', // Standardized password for all users
       role: 'Admin',
       spbu_code: 'SPBU-002',
       is_active: true
@@ -65,7 +66,7 @@ const seedData = {
       name: 'Operator SPBU 2',
       username: 'operator2',
       email: 'operator2@spbu.com',
-      password: 'Pertamina1*', // Akan dihash
+      password: 'Pertamina1*', // Standardized password for all users
       role: 'Operator',
       spbu_code: 'SPBU-002',
       is_active: true

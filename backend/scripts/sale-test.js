@@ -14,7 +14,7 @@ const bcrypt = require('bcryptjs');
 const API_BASE_URL = 'http://localhost:3000'; // Adjust to your backend URL
 const TEST_OPERATOR = {
   email: 'operator@test.com',
-  password: 'password123'
+  password: 'Pertamina1*' // Standardized password
 };
 
 // Test sales data

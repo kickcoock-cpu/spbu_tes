@@ -22,7 +22,7 @@ const testUsers = [
     name: 'Test Operator',
     email: 'operator@test.com',
     username: 'testoperator',
-    password: 'password123',
+    password: 'Pertamina1*', // Standardized password
     role: 'Operator'
   }
 ];

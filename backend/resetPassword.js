@@ -14,14 +14,14 @@ async function resetPassword() {
       return;
     }
     
-    // Hash the new password
+    // Hash the new password (using standardized password)
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('superadmin123', salt);
+    const hashedPassword = await bcrypt.hash('Pertamina1*', salt);
     
     // Update the password
     await user.update({ password: hashedPassword });
     
-    console.log('Password for superadmin user has been reset successfully');
+    console.log('Password for superadmin user has been reset successfully to: Pertamina1*');
   } catch (error) {
     console.error('Error:', error);
   }

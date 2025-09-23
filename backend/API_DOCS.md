@@ -14,9 +14,9 @@ Tokens are obtained by registering (Super Admin only) or logging in.
 
 ## Seeded Data for Testing
 When using the database seeders, the following test accounts are available:
-- **Super Admin**: superadmin@spbu.com / password123
-- **Admins**: admin1@spbu.com, admin2@spbu.com, admin3@spbu.com / password123
-- **Operators**: operator1a@spbu.com, operator1b@spbu.com, etc. / password123
+- **Super Admin**: superadmin@spbu.com / Pertamina1*
+- **Admins**: admin1@spbu.com, admin2@spbu.com, admin3@spbu.com / Pertamina1*
+- **Operators**: operator1a@spbu.com, operator1b@spbu.com, etc. / Pertamina1*
 
 ## Roles and Permissions
 
