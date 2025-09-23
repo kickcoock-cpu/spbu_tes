@@ -13,6 +13,11 @@ export const apiClient = axios.create({
   withCredentials: true, // Add this to ensure cookies are sent with requests
 })
 
+// Add debugging for URL construction
+console.log('API Client Configuration:');
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:3000');
+
 // Tambahkan interceptor untuk menangani error 405
 apiClient.interceptors.response.use(
   (response) => response,

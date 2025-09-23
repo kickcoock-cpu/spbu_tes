@@ -16,6 +16,7 @@ class WebSocketService {
 
     // Get base URL from environment or default to localhost:3000
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    console.log('WebSocket baseURL:', baseURL);
     
     // Create socket connection
     this.socket = io(baseURL, {

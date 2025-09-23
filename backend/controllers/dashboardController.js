@@ -59,20 +59,28 @@ const getDashboard = async (req, res) => {
       
       // Get all tanks with stock information
       const tanks = await Tank.findAll({
-        include: [{
-          model: SPBU,
-          attributes: ['name', 'code']
-        }]
+        include: [
+          {
+            model: SPBU,
+            attributes: ['name', 'code']
+          },
+          {
+            model: FuelType,
+            attributes: ['name']
+          }
+        ]
       });
       
       console.log('Total tanks for Super Admin:', tanks.length);
       
       dashboardData.tankStocks = tanks.map(tank => {
+        // Get the fuel type name
+        const fuelTypeRecord = tank.FuelType || { name: 'Unknown' };
         const percentage = (parseFloat(tank.current_stock) / parseFloat(tank.capacity)) * 100;
         return {
           id: tank.id,
           name: tank.name,
-          fuelType: tank.fuel_type,
+          fuelType: fuelTypeRecord.name,
           capacity: parseFloat(tank.capacity),
           currentStock: parseFloat(tank.current_stock),
           percentage: percentage
@@ -279,10 +287,16 @@ const getDashboard = async (req, res) => {
         where: {
           spbu_id: spbuId
         },
-        include: [{
-          model: SPBU,
-          attributes: ['name', 'code']
-        }]
+        include: [
+          {
+            model: SPBU,
+            attributes: ['name', 'code']
+          },
+          {
+            model: FuelType,
+            attributes: ['name']
+          }
+        ]
       });
       
       console.log('Found tanks for SPBU ID', spbuId, ':', tanks.map(t => ({

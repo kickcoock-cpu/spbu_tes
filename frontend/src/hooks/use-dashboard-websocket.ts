@@ -99,7 +99,9 @@ export function useDashboardWebSocket() {
       }
 
       // Create new socket connection
-      const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      console.log('Dashboard WebSocket baseURL:', baseURL);
+      const socket = io(baseURL, {
         transports: ['websocket'],
         reconnection: true,
         reconnectionAttempts: 5,
