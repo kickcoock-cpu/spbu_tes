@@ -303,7 +303,7 @@ const getDashboard = async (req, res) => {
         id: t.id,
         name: t.name,
         spbu_id: t.spbu_id,
-        fuel_type: t.fuel_type
+        fuel_type: t.FuelType ? t.FuelType.name : 'Unknown'
       })));
       
       console.log('Total tanks for Admin/Operator (SPBU ID:', spbuId, '):', tanks.length);
