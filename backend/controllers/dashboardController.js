@@ -81,6 +81,10 @@ const getDashboard = async (req, res) => {
       
       // Get stock predictions (based on actual sales data) using enhanced algorithm
       dashboardData.stockPredictions = await Promise.all(tanks.map(async (tank) => {
+        // Get the fuel type name
+        const fuelTypeRecord = await FuelType.findByPk(tank.fuel_type_id);
+        const fuelTypeName = fuelTypeRecord ? fuelTypeRecord.name : 'Unknown';
+        
         // Get detailed sales history for this fuel type for the past 60 days
         const sixtyDaysAgo = new Date();
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
@@ -88,13 +92,17 @@ const getDashboard = async (req, res) => {
         // Get sales data for this fuel type for the past 60 days
         const salesHistory = await Sale.findAll({
           where: {
-            fuel_type: tank.fuel_type,
+            fuel_type_id: tank.fuel_type_id,
             created_at: {
               [Op.gte]: sixtyDaysAgo
             }
           },
           order: [['created_at', 'ASC']],
-          attributes: ['id', 'fuel_type', 'liters', 'transaction_date', 'created_at']
+          attributes: ['id', 'fuel_type_id', 'liters', 'transaction_date', 'created_at'],
+          include: [{
+            model: FuelType,
+            attributes: ['name']
+          }]
         });
         
         // Use enhanced stockout prediction algorithm
@@ -148,7 +156,7 @@ const getDashboard = async (req, res) => {
         const fillPercentage = tankCapacity > 0 ? (currentStock / tankCapacity) * 100 : 0;
         
         return {
-          fuelType: tank.fuel_type,
+          fuelType: fuelTypeName,
           currentStock: Math.round(currentStock),
           tankCapacity: Math.round(tankCapacity),
           fillPercentage: fillPercentage,
