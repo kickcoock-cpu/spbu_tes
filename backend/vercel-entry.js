@@ -104,6 +104,8 @@ const corsOptions = {
       'http://localhost:3000',
       'https://spbu-tes.vercel.app',
       'https://pertashop-six.vercel.app',
+      'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
+      'https://simontok-ps.vercel.app',
       // Tambahkan domain frontend lain jika ada
     ];
     
@@ -200,6 +202,8 @@ module.exports = (req, res) => {
     'http://localhost:3000',
     'https://spbu-tes.vercel.app',
     'https://pertashop-six.vercel.app',
+    'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
+    'https://simontok-ps.vercel.app',
     // Tambahkan domain frontend lain jika ada
   ];
   

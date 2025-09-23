@@ -1,4 +1,4 @@
-const { Delivery, SPBU, User, FuelStock, Tank } = require('../models');
+const { Delivery, SPBU, User, FuelStock, Tank, FuelType } = require('../models');
 const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
 const { recordDeliveryTransaction } = require('../utils/ledgerUtils');
 
@@ -43,6 +43,10 @@ const getDeliveriesReadyForConfirmation = async (req, res) => {
           model: User,
           as: 'approver',
           attributes: ['id', 'name']
+        },
+        {
+          model: FuelType,
+          attributes: ['name']
         }
       ],
       order: [['created_at', 'DESC']]
@@ -128,12 +132,21 @@ const createDelivery = async (req, res) => {
       });
     }
     
+    // Find fuel type ID
+    const fuelTypeRecord = await FuelType.findOne({ where: { name: fuelType } });
+    if (!fuelTypeRecord) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid fuel type'
+      });
+    }
+    
     // Create delivery
     const deliveryData = {
       spbu_id: spbuId,
       supplier,
       delivery_order_number: deliveryOrderNumber,
-      fuel_type: fuelType,
+      fuel_type_id: fuelTypeRecord.id,
       planned_liters: liters
     };
     
@@ -147,7 +160,8 @@ const createDelivery = async (req, res) => {
     // Get delivery with related data
     const deliveryWithDetails = await Delivery.findByPk(delivery.id, {
       include: [
-        { model: SPBU, attributes: ['name', 'code'] }
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: FuelType, attributes: ['name'] }
       ]
     });
     
@@ -176,7 +190,8 @@ const getDeliveries = async (req, res) => {
     const includeOptions = [
       { model: SPBU, attributes: ['name', 'code'] },
       { model: User, as: 'confirmer', attributes: ['name'] },
-      { model: User, as: 'approver', attributes: ['name'] }
+      { model: User, as: 'approver', attributes: ['name'] },
+      { model: FuelType, attributes: ['name'] }
     ];
     
     // Explicitly include all delivery fields including harga_beli
@@ -186,7 +201,7 @@ const getDeliveries = async (req, res) => {
       'supplier',
       'delivery_order_number',
       'delivery_order_photo',
-      'fuel_type',
+      'fuel_type_id',
       'planned_liters',
       'actual_liters',
       'delivery_date',
@@ -240,7 +255,7 @@ const getDelivery = async (req, res) => {
         'supplier',
         'delivery_order_number',
         'delivery_order_photo',
-        'fuel_type',
+        'fuel_type_id',
         'planned_liters',
         'actual_liters',
         'delivery_date',
@@ -254,7 +269,8 @@ const getDelivery = async (req, res) => {
       include: [
         { model: SPBU, attributes: ['name', 'code'] },
         { model: User, as: 'confirmer', attributes: ['name'] },
-        { model: User, as: 'approver', attributes: ['name'] }
+        { model: User, as: 'approver', attributes: ['name'] },
+        { model: FuelType, attributes: ['name'] }
       ]
     });
     
@@ -327,7 +343,17 @@ const updateDelivery = async (req, res) => {
     
     // Prepare update data with only allowed fields
     const updateData = {};
-    if (fuelType !== undefined) updateData.fuel_type = fuelType;
+    if (fuelType !== undefined) {
+      // Find fuel type ID
+      const fuelTypeRecord = await FuelType.findOne({ where: { name: fuelType } });
+      if (!fuelTypeRecord) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid fuel type'
+        });
+      }
+      updateData.fuel_type_id = fuelTypeRecord.id;
+    }
     if (deliveryOrderNumber !== undefined) updateData.delivery_order_number = deliveryOrderNumber;
     updateData.supplier = supplier; // Always lock supplier
     
@@ -341,7 +367,8 @@ const updateDelivery = async (req, res) => {
     // Get updated delivery with related data
     const updatedDelivery = await Delivery.findByPk(delivery.id, {
       include: [
-        { model: SPBU, attributes: ['name', 'code'] }
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: FuelType, attributes: ['name'] }
       ]
     });
     
@@ -439,15 +466,19 @@ const confirmDelivery = async (req, res) => {
     delivery.confirmed_by = req.user?.id;
     delivery = await delivery.save();
     
+    // Get fuel type name for stock update
+    const fuelTypeRecord = await FuelType.findByPk(delivery.fuel_type_id);
+    const fuelTypeName = fuelTypeRecord ? fuelTypeRecord.name : 'Unknown';
+    
     // Update fuel stock
     const [fuelStock, created] = await FuelStock.findOrCreate({
       where: {
         spbu_id: delivery.spbu_id,
-        fuel_type: delivery.fuel_type
+        fuel_type: fuelTypeName
       },
       defaults: {
         spbu_id: delivery.spbu_id,
-        fuel_type: delivery.fuel_type,
+        fuel_type: fuelTypeName,
         stock: 0
       }
     });
@@ -462,7 +493,7 @@ const confirmDelivery = async (req, res) => {
     const tank = await Tank.findOne({
       where: {
         spbu_id: delivery.spbu_id,
-        fuel_type: delivery.fuel_type
+        fuel_type: fuelTypeName
       }
     });
     
@@ -475,7 +506,8 @@ const confirmDelivery = async (req, res) => {
     // Get updated delivery with related data
     const updatedDelivery = await Delivery.findByPk(delivery.id, {
       include: [
-        { model: SPBU, attributes: ['name', 'code'] }
+        { model: SPBU, attributes: ['name', 'code'] },
+        { model: FuelType, attributes: ['name'] }
       ]
     });
     
@@ -484,7 +516,7 @@ const confirmDelivery = async (req, res) => {
       await recordDeliveryTransaction({
         spbu_id: delivery.spbu_id,
         id: delivery.id,
-        fuel_type: delivery.fuel_type,
+        fuel_type: fuelTypeName,
         actual_liters: delivery.actual_liters,
         harga_beli: delivery.harga_beli,
         created_by: req.user?.id
@@ -554,7 +586,7 @@ const getAllDeliveriesForOperator = async (req, res) => {
         'supplier',
         'delivery_order_number',
         'delivery_order_photo',
-        'fuel_type',
+        'fuel_type_id',
         'planned_liters',
         'actual_liters',
         'delivery_date',
@@ -579,6 +611,10 @@ const getAllDeliveriesForOperator = async (req, res) => {
           model: User,
           as: 'approver',
           attributes: ['id', 'name']
+        },
+        {
+          model: FuelType,
+          attributes: ['name']
         }
       ],
       order: [['created_at', 'DESC']]

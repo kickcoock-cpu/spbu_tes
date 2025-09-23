@@ -12,6 +12,7 @@ const AuditLog = require('./AuditLog');
 const FuelStock = require('./FuelStock');
 const Tank = require('./Tank');
 const Ledger = require('./Ledger');
+const FuelType = require('./FuelType');
 
 // Definisikan relasi antar model
 Role.hasMany(User, { foreignKey: 'role_id' });
@@ -24,9 +25,13 @@ SPBU.hasMany(Sale, { foreignKey: 'spbu_id' });
 Sale.belongsTo(SPBU, { foreignKey: 'spbu_id' });
 User.hasMany(Sale, { foreignKey: 'operator_id' });
 Sale.belongsTo(User, { foreignKey: 'operator_id', as: 'operator' });
+Sale.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
+FuelType.hasMany(Sale, { foreignKey: 'fuel_type_id' });
 
 SPBU.hasMany(Delivery, { foreignKey: 'spbu_id' });
 Delivery.belongsTo(SPBU, { foreignKey: 'spbu_id' });
+Delivery.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
+FuelType.hasMany(Delivery, { foreignKey: 'fuel_type_id' });
 User.hasMany(Delivery, { foreignKey: 'confirmed_by' });
 Delivery.belongsTo(User, { foreignKey: 'confirmed_by', as: 'confirmer' });
 User.hasMany(Delivery, { foreignKey: 'approved_by' });
@@ -76,8 +81,9 @@ Ledger.belongsTo(SPBU, { foreignKey: 'spbu_id' });
 User.hasMany(Ledger, { foreignKey: 'created_by' });
 Ledger.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
-// Relationship between Tank and Price based on fuel_type
-// This is a logical relationship, not a foreign key relationship
+// Relationship between Sale and FuelType
+Sale.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
+FuelType.hasMany(Sale, { foreignKey: 'fuel_type_id' });
 
 User.hasMany(AuditLog, { foreignKey: 'user_id' });
 AuditLog.belongsTo(User, { foreignKey: 'user_id' });
@@ -97,5 +103,6 @@ module.exports = {
   AuditLog,
   FuelStock,
   Tank,
-  Ledger
+  Ledger,
+  FuelType
 };

@@ -175,6 +175,10 @@ const getDashboard = async (req, res) => {
             model: SPBU,
             as: 'SPBU',
             attributes: ['name', 'code']
+          },
+          {
+            model: FuelType,
+            attributes: ['name']
           }
         ],
         order: [['created_at', 'DESC']],
@@ -185,7 +189,7 @@ const getDashboard = async (req, res) => {
         operatorName: sale.operator ? sale.operator.name : 'Unknown',
         totalAmount: parseFloat(sale.amount),
         litersSold: parseFloat(sale.liters),
-        fuel_type: sale.fuel_type,
+        fuel_type: sale.FuelType ? sale.FuelType.name : 'Unknown',
         spbu: sale.SPBU ? {
           name: sale.SPBU.name,
           code: sale.SPBU.code
