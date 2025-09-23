@@ -1,7 +1,7 @@
 // Entry point khusus untuk Vercel Serverless Functions
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config({ path: '.env.vercel' });
+require('dotenv').config({ path: '.env.vercel' }); // Load .env.vercel file
 
 // Log environment variables for debugging (remove in production)
 console.log('=== ENVIRONMENT VARIABLES ===');

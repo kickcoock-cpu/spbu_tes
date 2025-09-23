@@ -7,15 +7,16 @@ let sequelize;
 try {
   console.log('=== DATABASE CONFIGURATION START ===');
   
-  // Gunakan environment variables dari .env.vercel
-  const dbHost = process.env.DB_HOST || 'aws-0-us-west-1.pooler.supabase.com';
+  // Gunakan environment variables yang benar dari .env.vercel
+  // Jika tidak ada, gunakan default yang benar
+  const dbHost = process.env.DB_HOST || 'aws-1-us-east-1.pooler.supabase.com';
   const dbUser = process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj';
   const dbName = process.env.DB_NAME || 'postgres';
   const dbPassword = process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO'; // Password yang benar
   const dbPort = process.env.DB_PORT || 5432;
   const dbDialect = process.env.DB_DIALECT || 'postgres';
   
-  console.log('Database configuration from .env.vercel:');
+  console.log('Database configuration (final):');
   console.log('- Host:', dbHost);
   console.log('- User:', dbUser);
   console.log('- Database:', dbName);
