@@ -461,7 +461,7 @@ const getDashboard = async (req, res) => {
         predictedStockoutDate.setDate(predictedStockoutDate.getDate() + daysUntilStockout);
         
         return {
-          fuelType: tank.fuel_type,
+          fuelType: tank.FuelType ? tank.FuelType.name : 'Unknown',
           currentStock: currentStock,
           tankCapacity: tankCapacity,
           avgDailyConsumption: avgDailyConsumption,

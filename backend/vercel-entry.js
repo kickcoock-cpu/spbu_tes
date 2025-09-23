@@ -165,6 +165,37 @@ app.use('/api/menu', require('./routes/menu'));
 app.use('/api/tanks', require('./routes/tanks'));
 app.use('/api/suspicious', require('./routes/suspicious'));
 
+// Default route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'SIMONTOK API is running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    documentation: 'https://github.com/your-repo/api-docs',
+    endpoints: {
+      health: '/health',
+      dashboard: '/api/dashboard',
+      users: '/api/users',
+      roles: '/api/roles',
+      spbu: '/api/spbu',
+      sales: '/api/sales',
+      deliveries: '/api/deliveries',
+      deposits: '/api/deposits',
+      prices: '/api/prices',
+      reports: '/api/reports',
+      ledger: '/api/reports/ledger',
+      attendance: '/api/attendance',
+      adjustments: '/api/adjustments',
+      audit: '/api/audit',
+      prediction: '/api/prediction',
+      menu: '/api/menu',
+      tanks: '/api/tanks',
+      suspicious: '/api/suspicious'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
