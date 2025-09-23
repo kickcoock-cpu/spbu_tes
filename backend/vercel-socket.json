@@ -25,6 +25,10 @@
       "dest": "vercel-entry.js"
     },
     {
+      "src": "/socket.io/(.*)",
+      "dest": "vercel-entry.js"
+    },
+    {
       "src": "/",
       "dest": "vercel-entry.js"
     },

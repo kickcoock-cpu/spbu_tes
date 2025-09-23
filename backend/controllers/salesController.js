@@ -1,6 +1,6 @@
 const { Sale, SPBU, User, Tank, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
+const { sendToVercelRealtimeAPI } = require('../services/realtime-stockout-service');
 const { updatePredictionsOnSale } = require('../services/realtime-stockout-service');
 const { v4: uuidv4 } = require('uuid');
 const { recordSaleTransaction } = require('../utils/ledgerUtils');
@@ -173,7 +173,14 @@ const createSale = async (req, res) => {
       });
       
       // Broadcast dashboard update for real-time updates
-      await broadcastDashboardUpdate();
+      // Send update to Vercel real-time API (using polling instead of websocket)
+      try {
+        sendToVercelRealtimeAPI('dashboard', {
+          timestamp: new Date().toISOString()
+        });
+      } catch (broadcastError) {
+        console.error('Error sending dashboard update to Vercel:', broadcastError);
+      }
       
       // Trigger real-time stockout prediction update
       await updatePredictionsOnSale(saleWithDetails);

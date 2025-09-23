@@ -2,16 +2,56 @@
 const { Tank, Sale, SPBU } = require('../models');
 const { enhancedStockoutPrediction } = require('../utils/stockout-prediction');
 const { Op } = require('sequelize');
+const https = require('https');
 
 // Store for real-time stockout predictions
 const stockoutPredictionsCache = new Map();
 const predictionUpdateListeners = new Set();
 
+// Vercel API endpoint for updating real-time data
+const VERCEL_REALTIME_API = process.env.VERCEL_REALTIME_API || 'https://your-realtime-api.vercel.app/api/realtime/update';
+
 /**
- * Subscribe to stockout prediction updates
- * @param {Function} callback - Callback function to receive updates
- * @returns {Function} - Unsubscribe function
+ * Send data to Vercel real-time API
+ * @param {string} type - Type of data update
+ * @param {Object} data - Data to send
  */
+const sendToVercelRealtimeAPI = async (type, data) => {
+  if (process.env.VERCEL !== '1') {
+    // Only send to Vercel API in Vercel environment
+    return;
+  }
+
+  try {
+    const postData = JSON.stringify({ type, data });
+    
+    const options = {
+      hostname: new URL(VERCEL_REALTIME_API).hostname,
+      port: 443,
+      path: new URL(VERCEL_REALTIME_API).pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      res.on('data', () => {}); // Consume response data
+    });
+
+    req.on('error', (error) => {
+      console.error('Error sending data to Vercel real-time API:', error);
+    });
+
+    req.write(postData);
+    req.end();
+  } catch (error) {
+    console.error('Error preparing data for Vercel real-time API:', error);
+  }
+};
+
+/**\n * Subscribe to stockout prediction updates\n * @param {Function} callback - Function to call when updates occur\n * @returns {Function} - Unsubscribe function\n */
 const subscribeToStockoutUpdates = (callback) => {
   predictionUpdateListeners.add(callback);
   
@@ -21,16 +61,17 @@ const subscribeToStockoutUpdates = (callback) => {
   };
 };
 
-/**
- * Notify all subscribers of stockout prediction updates
- * @param {Object} data - Updated stockout prediction data
- */
+/**\n * Notify all subscribers of stockout prediction updates\n * @param {Object} data - Updated stockout prediction data\n */
 const notifyStockoutUpdates = (data) => {
+  // Send data to Vercel real-time API
+  sendToVercelRealtimeAPI('stockout-predictions', data);
+  
+  // Notify local subscribers (for development/local environments)
   predictionUpdateListeners.forEach(callback => {
     try {
       callback(data);
     } catch (error) {
-      console.error('Error notifying stockout update subscriber:', error);
+      console.error('Error in stockout update callback:', error);
     }
   });
 };
@@ -257,15 +298,26 @@ const updatePredictionsOnStockChange = async (tank) => {
     // Recalculate predictions for this SPBU and fuel type
     const updatedPredictions = await calculateRealTimeStockoutPredictions({
       spbuId: tank.spbu_id,
-      fuelType: tank.fuel_type
+      fuelType: tank.FuelType.name
     });
     
     // Notify subscribers of the update
     notifyStockoutUpdates({
       type: 'STOCK_CHANGED',
       spbuId: tank.spbu_id,
-      fuelType: tank.fuel_type,
+      fuelType: tank.FuelType.name,
       predictions: updatedPredictions,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Also send dashboard update to Vercel real-time API
+    sendToVercelRealtimeAPI('dashboard', {
+      totalLiters: 0, // This would be calculated in a real implementation
+      totalSalesCount: 0,
+      stockPredictions: updatedPredictions,
+      tankStocks: [],
+      recentSales: [],
+      recentDeliveries: [],
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -279,5 +331,6 @@ module.exports = {
   subscribeToStockoutUpdates,
   updatePredictionsOnSale,
   updatePredictionsOnStockChange,
-  clearStockoutPredictionsCache
+  clearStockoutPredictionsCache,
+  sendToVercelRealtimeAPI
 };

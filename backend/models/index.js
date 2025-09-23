@@ -30,8 +30,8 @@ FuelType.hasMany(Sale, { foreignKey: 'fuel_type_id' });
 
 SPBU.hasMany(Delivery, { foreignKey: 'spbu_id' });
 Delivery.belongsTo(SPBU, { foreignKey: 'spbu_id' });
-Delivery.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
-FuelType.hasMany(Delivery, { foreignKey: 'fuel_type_id' });
+// Delivery.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
+// FuelType.hasMany(Delivery, { foreignKey: 'fuel_type_id' });
 User.hasMany(Delivery, { foreignKey: 'confirmed_by' });
 Delivery.belongsTo(User, { foreignKey: 'confirmed_by', as: 'confirmer' });
 User.hasMany(Delivery, { foreignKey: 'approved_by' });
@@ -82,8 +82,8 @@ User.hasMany(Ledger, { foreignKey: 'created_by' });
 Ledger.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
 // Relationship between Sale and FuelType
-Sale.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
-FuelType.hasMany(Sale, { foreignKey: 'fuel_type_id' });
+// Sale.belongsTo(FuelType, { foreignKey: 'fuel_type_id' });
+// FuelType.hasMany(Sale, { foreignKey: 'fuel_type_id' });
 
 User.hasMany(AuditLog, { foreignKey: 'user_id' });
 AuditLog.belongsTo(User, { foreignKey: 'user_id' });

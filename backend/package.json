@@ -1,51 +1,20 @@
 {
-  "name": "spbu-rbac-api",
+  "name": "simontok-backend",
   "version": "1.0.0",
-  "description": "Backend API for SPBU management with RBAC",
+  "description": "Backend for SIMONTOK application",
   "main": "vercel-entry.js",
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "type": "commonjs",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "build": "echo \"Building backend...\"",
-    "test-db": "node test-db-connection.js",
-    "test-supabase": "node test-supabase-connection.js",
-    "test-supabase-migration": "node test-supabase-migration.js",
-    "test-db-connection": "node testers/db-test.js",
-    "migrate-supabase": "node migrate-supabase.js",
-    "seed-supabase": "node seed-supabase.js",
-    "seed-database": "node seeders/supabase-seeder.js",
-    "vercel-build": "echo \"Running vercel build...\" && npm install",
-    "clean-install": "rm -rf node_modules package-lock.json && npm install",
-    "network": "node scripts/network-info.js",
-    "update-frontend": "node scripts/update-frontend-env.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "db:migrate": "sequelize-cli db:migrate",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo",
-    "db:seed:all": "sequelize-cli db:seed:all",
-    "db:seed:undo:all": "sequelize-cli db:seed:undo:all"
+    "start": "node vercel-entry.js",
+    "dev": "nodemon vercel-entry.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.2",
-    "mysql2": "^3.6.0",
-    "pg": "^8.16.3",
-    "pg-hstore": "^2.3.4",
     "sequelize": "^6.32.1",
-    "socket.io": "^4.8.1",
-    "uuid": "^8.3.2"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.1",
-    "sequelize-cli": "^6.6.3",
-    "supertest": "^6.3.3"
+    "pg": "^8.11.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.1"
   }
 }

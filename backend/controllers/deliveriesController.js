@@ -1,5 +1,5 @@
 const { Delivery, SPBU, User, FuelStock, Tank, FuelType } = require('../models');
-const { broadcastDashboardUpdate } = require('../utils/broadcastUtils');
+const { sendToVercelRealtimeAPI } = require('../services/realtime-stockout-service');
 const { recordDeliveryTransaction } = require('../utils/ledgerUtils');
 
 // @desc    Get deliveries ready for confirmation (H+1)
@@ -146,7 +146,7 @@ const createDelivery = async (req, res) => {
       spbu_id: spbuId,
       supplier,
       delivery_order_number: deliveryOrderNumber,
-      fuel_type_id: fuelTypeRecord.id,
+      fuel_type: fuelType,
       planned_liters: liters
     };
     
@@ -352,7 +352,7 @@ const updateDelivery = async (req, res) => {
           message: 'Invalid fuel type'
         });
       }
-      updateData.fuel_type_id = fuelTypeRecord.id;
+      updateData.fuel_type = fuelType;
     }
     if (deliveryOrderNumber !== undefined) updateData.delivery_order_number = deliveryOrderNumber;
     updateData.supplier = supplier; // Always lock supplier
@@ -467,7 +467,7 @@ const confirmDelivery = async (req, res) => {
     delivery = await delivery.save();
     
     // Get fuel type name for stock update
-    const fuelTypeRecord = await FuelType.findByPk(delivery.fuel_type_id);
+    const fuelTypeRecord = { name: delivery.fuel_type };
     const fuelTypeName = fuelTypeRecord ? fuelTypeRecord.name : 'Unknown';
     
     // Update fuel stock
@@ -527,7 +527,17 @@ const confirmDelivery = async (req, res) => {
     }
     
     // Broadcast dashboard update for real-time updates (only to relevant users)
-    await broadcastDashboardUpdate(req.user?.id, delivery.spbu_id, req.user?.Role?.name);
+    // Send update to Vercel real-time API (using polling instead of websocket)
+    try {
+      sendToVercelRealtimeAPI('dashboard', {
+        userId: req.user?.id,
+        spbuId: delivery.spbu_id,
+        userRole: req.user?.Role?.name,
+        timestamp: new Date().toISOString()
+      });
+    } catch (broadcastError) {
+      console.error('Error sending dashboard update to Vercel:', broadcastError);
+    }
     
     res.status(200).json({
       success: true,

@@ -1,4 +1,4 @@
-const { Sale, Delivery, Deposit, Attendance, SPBU, User, Adjustment, Tank, sequelize } = require('../models');
+const { Sale, Delivery, Deposit, Attendance, SPBU, User, Adjustment, Tank, FuelType, sequelize } = require('../models');
 const { Op, fn, col, where } = require('sequelize');
 const { enhancedStockoutPrediction } = require('../utils/stockout-prediction');
 
@@ -63,10 +63,6 @@ const getDashboard = async (req, res) => {
           {
             model: SPBU,
             attributes: ['name', 'code']
-          },
-          {
-            model: FuelType,
-            attributes: ['name']
           }
         ]
       });
@@ -75,7 +71,7 @@ const getDashboard = async (req, res) => {
       
       dashboardData.tankStocks = tanks.map(tank => {
         // Get the fuel type name
-        const fuelTypeRecord = tank.FuelType || { name: 'Unknown' };
+        const fuelTypeRecord = { name: tank.fuel_type };
         const percentage = (parseFloat(tank.current_stock) / parseFloat(tank.capacity)) * 100;
         return {
           id: tank.id,
@@ -90,8 +86,7 @@ const getDashboard = async (req, res) => {
       // Get stock predictions (based on actual sales data) using enhanced algorithm
       dashboardData.stockPredictions = await Promise.all(tanks.map(async (tank) => {
         // Get the fuel type name
-        const fuelTypeRecord = await FuelType.findByPk(tank.fuel_type_id);
-        const fuelTypeName = fuelTypeRecord ? fuelTypeRecord.name : 'Unknown';
+        const fuelTypeName = tank.fuel_type;
         
         // Get detailed sales history for this fuel type for the past 60 days
         const sixtyDaysAgo = new Date();
@@ -100,17 +95,14 @@ const getDashboard = async (req, res) => {
         // Get sales data for this fuel type for the past 60 days
         const salesHistory = await Sale.findAll({
           where: {
-            fuel_type_id: tank.fuel_type_id,
+            fuel_type_id: tank.fuel_type,
             created_at: {
               [Op.gte]: sixtyDaysAgo
             }
           },
           order: [['created_at', 'ASC']],
-          attributes: ['id', 'fuel_type_id', 'liters', 'transaction_date', 'created_at'],
-          include: [{
-            model: FuelType,
-            attributes: ['name']
-          }]
+          attributes: ['id', 'fuel_type', 'liters', 'transaction_date', 'created_at']
+          // Removed FuelType association since we're using fuel_type as string
         });
         
         // Use enhanced stockout prediction algorithm
@@ -191,11 +183,8 @@ const getDashboard = async (req, res) => {
             model: SPBU,
             as: 'SPBU',
             attributes: ['name', 'code']
-          },
-          {
-            model: FuelType,
-            attributes: ['name']
           }
+          // Removed FuelType association since we're using fuel_type as string
         ],
         order: [['created_at', 'DESC']],
         limit: 10
@@ -205,7 +194,7 @@ const getDashboard = async (req, res) => {
         operatorName: sale.operator ? sale.operator.name : 'Unknown',
         totalAmount: parseFloat(sale.amount),
         litersSold: parseFloat(sale.liters),
-        fuel_type: sale.FuelType ? sale.FuelType.name : 'Unknown',
+        fuel_type: sale.fuel_type || 'Unknown',
         spbu: sale.SPBU ? {
           name: sale.SPBU.name,
           code: sale.SPBU.code
@@ -303,7 +292,7 @@ const getDashboard = async (req, res) => {
         id: t.id,
         name: t.name,
         spbu_id: t.spbu_id,
-        fuel_type: t.FuelType ? t.FuelType.name : 'Unknown'
+        fuel_type: t.fuel_type || 'Unknown'
       })));
       
       console.log('Total tanks for Admin/Operator (SPBU ID:', spbuId, '):', tanks.length);
@@ -330,7 +319,7 @@ const getDashboard = async (req, res) => {
         const salesData = await Sale.findAll({
           where: {
             spbu_id: spbuId,
-            fuel_type: tank.fuel_type,
+            fuel_type: tank.FuelType.name,
             created_at: {
               [Op.gte]: thirtyDaysAgo
             }
@@ -376,7 +365,7 @@ const getDashboard = async (req, res) => {
           const recentSalesData = await Sale.findAll({
             where: {
               spbu_id: spbuId,
-              fuel_type: tank.fuel_type,
+              fuel_type: tank.FuelType.name,
               created_at: {
                 [Op.gte]: fifteenDaysAgo,
                 [Op.lte]: new Date()
@@ -389,7 +378,7 @@ const getDashboard = async (req, res) => {
           const previousSalesData = await Sale.findAll({
             where: {
               spbu_id: spbuId,
-              fuel_type: tank.fuel_type,
+              fuel_type: tank.FuelType.name,
               created_at: {
                 [Op.gte]: thirtyDaysAgo,
                 [Op.lt]: fifteenDaysAgo

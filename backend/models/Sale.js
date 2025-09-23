@@ -20,8 +20,8 @@ const Sale = sequelize.define('Sale', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  fuel_type_id: {
-    type: DataTypes.INTEGER,
+  fuel_type: {
+    type: DataTypes.ENUM('Premium', 'Pertamax', 'Pertalite', 'Solar', 'Dexlite'),
     allowNull: false
   },
   liters: {

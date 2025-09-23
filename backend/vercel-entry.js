@@ -16,73 +16,6 @@ console.log('==============================');
 
 // Inisialisasi koneksi database dengan konfigurasi khusus untuk Vercel
 let sequelize;
-try {
-  const { Sequelize } = require('sequelize');
-  
-  // Gunakan connection string jika tersedia
-  if (process.env.POSTGRES_URL) {
-    console.log('Using connection string for Vercel database connection');
-    sequelize = new Sequelize(process.env.POSTGRES_URL, {
-      logging: false,
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      },
-      ssl: true
-    });
-  } else {
-    // Fallback ke konfigurasi manual dengan SSL settings yang lebih eksplisit
-    sequelize = new Sequelize(
-      process.env.DB_NAME || 'postgres',
-      process.env.DB_USER || 'postgres.eqwnpfuuwpdsacyvdrvj',
-      process.env.DB_PASSWORD || 'RAjevhNTBYzbD9oO',
-      {
-        host: process.env.DB_HOST || 'aws-1-us-east-1.pooler.supabase.com',
-        port: process.env.DB_PORT || 6543,
-        dialect: 'postgres',
-        logging: false,
-        dialectOptions: {
-          ssl: {
-            require: true,
-            rejectUnauthorized: false
-          }
-        },
-        ssl: true,
-        pool: {
-          max: 5,
-          min: 0,
-          acquire: 30000,
-          idle: 10000
-        }
-      }
-    );
-  }
-  
-  // Test koneksi
-  sequelize.authenticate()
-    .then(() => {
-      console.log('✅ Database connection established for Vercel');
-    })
-    .catch(err => {
-      console.error('❌ Unable to connect to the database in Vercel:', err.message);
-    });
-} catch (error) {
-  console.error('❌ Error initializing database connection:', error);
-}
-
-// Fungsi connectDB khusus untuk Vercel
-const connectDB = async () => {
-  try {
-    if (sequelize) {
-      await sequelize.authenticate();
-      console.log('✅ Koneksi database berhasil terestablish di Vercel.');
-    }
-  } catch (error) {
-    console.error('❌ Gagal menghubungkan ke database di Vercel:', error);
-  }
-};
 
 // Inisialisasi aplikasi Express
 const app = express();
@@ -106,6 +39,7 @@ const corsOptions = {
       'https://pertashop-six.vercel.app',
       'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
       'https://simontok-ps.vercel.app',
+      'https://simontok-api.vercel.app', // Tambahkan origin API
       // Tambahkan domain frontend lain jika ada
     ];
     
@@ -133,17 +67,6 @@ app.use((req, res, next) => {
     console.log(`Body:`, req.body);
   }
   next();
-});
-
-// Koneksi ke database dengan error handling
-connectDB().catch((error) => {
-  console.error('❌ Gagal menghubungkan ke database:', error);
-  console.error('Error details:', {
-    message: error.message,
-    stack: error.stack,
-    name: error.name
-  });
-  // Jangan throw error agar server tetap bisa jalan untuk health check
 });
 
 // Routes
@@ -235,6 +158,7 @@ module.exports = (req, res) => {
     'https://pertashop-six.vercel.app',
     'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
     'https://simontok-ps.vercel.app',
+    'https://simontok-api.vercel.app', // Tambahkan origin API
     // Tambahkan domain frontend lain jika ada
   ];
   
@@ -264,5 +188,125 @@ if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Default route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'SIMONTOK API is running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    documentation: 'https://github.com/your-repo/api-docs',
+    endpoints: {
+      health: '/health',
+      dashboard: '/api/dashboard',
+      users: '/api/users',
+      roles: '/api/roles',
+      spbu: '/api/spbu',
+      sales: '/api/sales',
+      deliveries: '/api/deliveries',
+      deposits: '/api/deposits',
+      prices: '/api/prices',
+      reports: '/api/reports',
+      ledger: '/api/reports/ledger',
+      attendance: '/api/attendance',
+      adjustments: '/api/adjustments',
+      audit: '/api/audit',
+      prediction: '/api/prediction',
+      menu: '/api/menu',
+      tanks: '/api/tanks',
+      suspicious: '/api/suspicious'
+    }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    database: 'PostgreSQL/Supabase'
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  console.log(`404 - Route not found: ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+});
+
+// Export handler untuk Vercel
+export default (req, res) => {
+  // Set CORS headers secara manual untuk OPTIONS request
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://spbu-tes.vercel.app',
+    'https://pertashop-six.vercel.app',
+    'https://frontend-kbrdmhe8z-kickcoock-7080s-projects.vercel.app',
+    'https://simontok-ps.vercel.app',
+    'https://simontok-api.vercel.app', // Tambahkan origin API
+    // Tambahkan domain frontend lain jika ada
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  // Pass request to express app
+  return app(req, res);
+};
+
+// Untuk development local
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, async () => {
+    console.log(`Server running on port ${PORT}`);
+    
+    // Initialize database connection
+    try {
+      const dbModule = await import('./config/db.js');
+      if (dbModule.connectDB) {
+        await dbModule.connectDB();
+      } else {
+        console.error('❌ connectDB function not found in db module');
+      }
+    } catch (error) {
+      console.error('❌ Gagal menghubungkan ke database:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
   });
 }
