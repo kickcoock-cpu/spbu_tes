@@ -192,10 +192,24 @@ const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    console.error('Error stack:', error.stack);
+    // Provide more detailed error information
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error.message 
+      : 'Server Error';
+    
     res.status(500).json({
       success: false,
       message: 'Server Error',
-      error: error.message
+      error: errorMessage,
+      // Include error details in development only
+      ...(process.env.NODE_ENV === 'development' && {
+        errorDetails: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        }
+      })
     });
   }
 };

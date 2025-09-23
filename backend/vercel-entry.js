@@ -136,6 +136,11 @@ app.use((req, res, next) => {
 // Koneksi ke database dengan error handling
 connectDB().catch((error) => {
   console.error('❌ Gagal menghubungkan ke database:', error);
+  console.error('Error details:', {
+    message: error.message,
+    stack: error.stack,
+    name: error.name
+  });
   // Jangan throw error agar server tetap bisa jalan untuk health check
 });
 

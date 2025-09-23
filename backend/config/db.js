@@ -111,6 +111,19 @@ const connectDB = async () => {
   } catch (error) {
     console.error('=== DATABASE CONNECTION ERROR ===');
     console.error('Tidak dapat terhubung ke database:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    // If it's an SSL error, provide specific guidance
+    if (error.message && error.message.includes('self-signed certificate')) {
+      console.error('🔧 SSL Certificate Issue:');
+      console.error('   This is a common issue with Supabase connections.');
+      console.error('   Make sure rejectUnauthorized is set to false in SSL configuration.');
+    }
+    
     throw error;
   }
 };
